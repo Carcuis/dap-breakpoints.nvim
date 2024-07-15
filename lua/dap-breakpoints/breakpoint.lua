@@ -148,7 +148,7 @@ function M.show_breakpoint_property(target, property, silent)
     util.show_popup({
       title = title,
       message = "\"" .. message .. "\"",
-      syntax = vim.bo.filetype,
+      syntax = "lua",
     })
   end
 end
