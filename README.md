@@ -1,6 +1,6 @@
 # dap-breakpoints.nvim
 
-`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage and display breakpoints info using [nvim-dap](https://github.com/mfussenegger/nvim-dap)
+`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage and display breakpoints info with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
 
 ## Dependencies
 
@@ -53,8 +53,8 @@ Reloads virtual text revealing information about breakpoints within current buff
 
 - `DapBreakpointVirtualText`
 - `DapLogPointVirtualText`
-- `DapConditionPointVirtualText`
-- `DapHitConditionPointVirtualText`
+- `DapConditionalPointVirtualText`
+- `DapHitConditionalPointVirtualText`
 
 ## References
 

@@ -1,8 +1,57 @@
 local M = {}
 
+local nvim_dap_breakpoints = require("dap.breakpoints")
 local config = require("dap-breakpoints.config")
-local noti_utils = require("dap-breakpoints.noti-utils")
-local breakpoint_utils = require("dap-breakpoints.breakpoint-utils")
+local util = require("dap-breakpoints.util")
+
+function M.get_breakpoints_in_buffer(_bufnr)
+  local bufnr = _bufnr or vim.fn.bufnr()
+
+  local breakpoints_map = nvim_dap_breakpoints.get()[bufnr]
+  if breakpoints_map == nil or #breakpoints_map == 0 then
+    return nil
+  end
+
+  return breakpoints_map
+end
+
+function M.get_breakpoints_on_line(_line, _bufnr)
+  local bufnr = _bufnr or vim.fn.bufnr()
+  local line = _line or vim.fn.line(".")
+
+  local breakpoints_map = M.get_breakpoints_in_buffer(bufnr)
+  if breakpoints_map == nil then
+    return nil
+  end
+
+  local target = {}
+  for _, value in ipairs(breakpoints_map) do
+    if value.line == line then
+      target[#target + 1] = value
+      -- NOTE: Breaking since only one breakpoint can currently be placed on a line
+      break
+    end
+  end
+
+  if #target == 0 then
+    return nil
+  else
+    return target
+  end
+end
+
+function M.get_breakpoints_on_current_line()
+  local current_line = vim.fn.line(".")
+  return M.get_breakpoints_on_line(current_line)
+end
+
+function M.is_special_breakpoint(target)
+  if target.logMessage ~= nil or target.condition ~= nil or target.hitCondition ~= nil then
+    return true
+  else
+    return false
+  end
+end
 
 function M.custom_set_breakpoint(condition, hit_condition, log_message)
   local dap = require("dap")
@@ -13,9 +62,9 @@ function M.custom_set_breakpoint(condition, hit_condition, log_message)
 end
 
 function M.update_breakpoint_on_current_line()
-  local target = breakpoint_utils.get_breakpoints_on_current_line()
+  local target = M.get_breakpoints_on_current_line()
   if target == nil then
-    noti_utils.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
+    util.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
     return
   else
     target = target[1]
@@ -29,7 +78,7 @@ function M.update_breakpoint_on_current_line()
   elseif target.hitCondition ~= nil then
     targetProperty = "hitCondition"
   else
-    noti_utils.echo_message("Ignoring since this is not a special breakpoint.", vim.log.levels.WARN)
+    util.echo_message("Ignoring since this is not a special breakpoint.", vim.log.levels.WARN)
     return
   end
 
@@ -51,7 +100,7 @@ end
 function M.show_breakpoint_property(target, property, silent)
   if target == nil then
     if not silent then
-      noti_utils.echo_message("Invalid breakpoint was provided.", vim.log.levels.ERROR)
+      util.echo_message("Invalid breakpoint was provided.", vim.log.levels.ERROR)
     end
     return
   end
@@ -66,7 +115,7 @@ function M.show_breakpoint_property(target, property, silent)
       finalProperty = "hitCondition"
     else
       if not silent then
-        noti_utils.echo_message("No extra information to pull from this breakpoint.", vim.log.levels.WARN)
+        util.echo_message("No extra information to pull from this breakpoint.", vim.log.levels.WARN)
       end
       return
     end
@@ -74,47 +123,47 @@ function M.show_breakpoint_property(target, property, silent)
 
   local message = target[finalProperty]
   if message == nil then
-    noti_utils.echo_message("Breakpoint does not have a " .. finalProperty .. " attribute.", vim.log.levels.WARN)
+    util.echo_message("Breakpoint does not have a " .. finalProperty .. " attribute.", vim.log.levels.WARN)
     return
   end
 
   if finalProperty == "condition" then
     local title = "DAP - Conditional Breakpoint"
-    noti_utils.show_popup({
+    util.show_popup({
       title = title,
       message = message,
       syntax = vim.bo.filetype,
     })
   elseif finalProperty == "hitCondition" then
     local title = "DAP - Hit Conditional Breakpoint"
-    noti_utils.show_popup({
+    util.show_popup({
       title = title,
       message = message,
       syntax = vim.bo.filetype,
     })
   else
     local title = "DAP - Logpoint"
-    noti_utils.show_popup({
+    util.show_popup({
       title = title,
-      message = "Outputs: '" .. message .. "'.",
+      message = "\"" .. message .. "\"",
       syntax = "lua",
     })
   end
 end
 
 function M.show_breakpoint_info_on_current_line()
-  local target = breakpoint_utils.get_breakpoints_on_current_line()
+  local target = M.get_breakpoints_on_current_line()
   if target ~= nil then
     M.show_breakpoint_property(target[1])
   else
-    noti_utils.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
+    util.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
   end
 end
 
 function M.go_to_next_breakpoint(go_to_prev)
-  local breakpoints_map = breakpoint_utils.get_breakpoints_in_buffer()
+  local breakpoints_map = M.get_breakpoints_in_buffer()
   if breakpoints_map == nil then
-    noti_utils.echo_message("There are no breakpoints in this file.", vim.log.levels.WARN)
+    util.echo_message("There are no breakpoints in this file.", vim.log.levels.WARN)
     return
   end
 
@@ -146,14 +195,14 @@ function M.go_to_next_breakpoint(go_to_prev)
   end
 
   if target.line == start_line then
-    noti_utils.echo_message("Already at only breakpoint.", vim.log.levels.WARN)
+    util.echo_message("Already at only breakpoint.", vim.log.levels.WARN)
     return
   end
 
   vim.fn.cursor({ target.line, start_column })
 
   -- FIX: Doesn't seem to be working properly
-  if breakpoint_utils.is_special_breakpoint(target) then
+  if M.is_special_breakpoint(target) then
     vim.schedule(function()
       M.show_breakpoint_property(target)
     end)

@@ -1,8 +1,9 @@
 local M = {}
 
 local config = require("dap-breakpoints.config")
-local breakpoint_util = require("dap-breakpoints.breakpoint-utils")
+local breakpoint = require("dap-breakpoints.breakpoint")
 
+local namespace = "dap-breakpoints"
 local virtual_text_list = {}
 
 local break_point_types = {
@@ -14,8 +15,8 @@ local break_point_types = {
 local virtual_text_highlight_list = {
   [break_point_types.REGULAR]         = "DapBreakpointVirtualText",
   [break_point_types.LOG_POINT]       = "DapLogPointVirtualText",
-  [break_point_types.CONDITIONAL]     = "DapConditionPointVirtualText",
-  [break_point_types.HIT_CONDITIONAL] = "DapHitConditionPointVirtualText",
+  [break_point_types.CONDITIONAL]     = "DapConditionalPointVirtualText",
+  [break_point_types.HIT_CONDITIONAL] = "DapHitConditionalPointVirtualText",
 }
 
 function M.get_breakpoint_type(target)
@@ -34,7 +35,7 @@ function M.clear_virt_text_on_line(_line, _bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
   local line = _line or vim.fn.line(".")
 
-  local virt_text_ns = vim.api.nvim_create_namespace(config.virt_text_opts.namespace)
+  local virt_text_ns = vim.api.nvim_create_namespace(namespace)
   local extmarks = vim.api.nvim_buf_get_extmarks(
     bufnr,
     virt_text_ns,
@@ -62,9 +63,9 @@ end
 
 function M.create_virt_text_chunks_by_breakpoints(breakpoints)
   local special_breakpoints = {}
-  for _, breakpoint in ipairs(breakpoints) do
-    if breakpoint_util.is_special_breakpoint(breakpoint) then
-      special_breakpoints[#special_breakpoints + 1] = breakpoint
+  for _, _breakpoint in ipairs(breakpoints) do
+    if breakpoint.is_special_breakpoint(_breakpoint) then
+      special_breakpoints[#special_breakpoints + 1] = _breakpoint
     end
   end
 
@@ -117,8 +118,8 @@ function M.show_line_breakpoint_info_in_virt_text(_line, _bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
   local line = _line or vim.fn.line(".")
 
-  local virt_text_ns = vim.api.nvim_create_namespace(config.virt_text_opts.namespace)
-  local breakpoints = breakpoint_util.get_breakpoints_on_line(line, bufnr)
+  local virt_text_ns = vim.api.nvim_create_namespace(namespace)
+  local breakpoints = breakpoint.get_breakpoints_on_line(line, bufnr)
   local virt_text = M.create_virt_text_chunks_by_breakpoints(breakpoints)
 
   local cached_buffer_info = virtual_text_list[bufnr] or {}
@@ -137,13 +138,13 @@ end
 function M.show_buffer_breakpoint_info_in_virt_text(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 
-  local breakpoints = breakpoint_util.get_breakpoints_in_buffer(bufnr)
+  local breakpoints = breakpoint.get_breakpoints_in_buffer(bufnr)
   if breakpoints == nil then
     return
   end
 
-  for _, breakpoint in ipairs(breakpoints) do
-    M.show_line_breakpoint_info_in_virt_text(breakpoint.line, bufnr)
+  for _, _breakpoint in ipairs(breakpoints) do
+    M.show_line_breakpoint_info_in_virt_text(_breakpoint.line, bufnr)
   end
 end
 
