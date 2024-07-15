@@ -19,15 +19,15 @@ local setup_commands = function()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpClearVirtText", function()
-    virtual_text.clear_virt_text_in_buffer()
+    virtual_text.clear_virtual_text_in_buffer()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpShowVirtText", function()
-    virtual_text.show_buffer_breakpoint_info_in_virt_text()
+    virtual_text.show_buffer_breakpoint_info_in_virtual_text()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpReloadVirtText", function()
-    virtual_text.reload_buffer_virt_text()
+    virtual_text.reload_buffer_virtual_text()
   end, {})
 end
 

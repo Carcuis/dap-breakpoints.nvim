@@ -1,7 +1,7 @@
 local config = {}
 
 config = {
-  virt_text = {
+  virtual_text = {
     prefix = "󰻂 ",
     suffix = "",
     spacing = 4,

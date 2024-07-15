@@ -11,7 +11,7 @@
 
 ```lua
 require('dap-breakpoints').setup{
-  virt_text = {
+  virtual_text = {
     prefix = "󰻂 ",
     suffix = "",
     spacing = 4,

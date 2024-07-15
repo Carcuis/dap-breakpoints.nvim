@@ -31,14 +31,14 @@ function M.get_breakpoint_type(target)
   end
 end
 
-function M.clear_virt_text_on_line(_line, _bufnr)
+function M.clear_virtual_text_on_line(_line, _bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
   local line = _line or vim.fn.line(".")
 
-  local virt_text_ns = vim.api.nvim_create_namespace(namespace)
+  local _namespace = vim.api.nvim_create_namespace(namespace)
   local extmarks = vim.api.nvim_buf_get_extmarks(
     bufnr,
-    virt_text_ns,
+    _namespace,
     { line - 1, 0 },
     { line - 1, -1 },
     { details = true }
@@ -46,22 +46,22 @@ function M.clear_virt_text_on_line(_line, _bufnr)
 
   for _, extmark in ipairs(extmarks) do
     local mark_line = extmark[2]
-    vim.api.nvim_buf_clear_namespace(bufnr, virt_text_ns, mark_line, mark_line + 1)
+    vim.api.nvim_buf_clear_namespace(bufnr, _namespace, mark_line, mark_line + 1)
     virtual_text_list[bufnr][line] = nil
   end
 end
 
-function M.clear_virt_text_in_buffer(_bufnr)
+function M.clear_virtual_text_in_buffer(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
-  local saved_virt_text_lines = virtual_text_list[bufnr]
-  if saved_virt_text_lines ~= nil then
-    for line, _ in pairs(saved_virt_text_lines) do
-      M.clear_virt_text_on_line(line)
+  local saved_virtual_text_lines = virtual_text_list[bufnr]
+  if saved_virtual_text_lines ~= nil then
+    for line, _ in pairs(saved_virtual_text_lines) do
+      M.clear_virtual_text_on_line(line)
     end
   end
 end
 
-function M.create_virt_text_chunks_by_breakpoints(breakpoints)
+function M.create_virtual_text_chunks_by_breakpoints(breakpoints)
   local special_breakpoints = {}
   for _, _breakpoint in ipairs(breakpoints) do
     if breakpoint.is_special_breakpoint(_breakpoint) then
@@ -73,12 +73,12 @@ function M.create_virt_text_chunks_by_breakpoints(breakpoints)
     return nil
   end
 
-  local prefix = config.virt_text_opts.prefix
-  local suffix = config.virt_text_opts.suffix
-  local spacing = config.virt_text_opts.spacing
+  local prefix = config.virtual_text.prefix
+  local suffix = config.virtual_text.suffix
+  local spacing = config.virtual_text.spacing
 
   -- Create a little more space between virtual text and contents
-  local virt_texts = { { string.rep(" ", spacing) } }
+  local virtual_texts = { { string.rep(" ", spacing) } }
 
   for i = 1, #special_breakpoints do
     local resolved_prefix = prefix
@@ -86,7 +86,7 @@ function M.create_virt_text_chunks_by_breakpoints(breakpoints)
       resolved_prefix = prefix(special_breakpoints[i]) or ""
     end
     table.insert(
-      virt_texts,
+      virtual_texts,
       { resolved_prefix, virtual_text_highlight_list[M.get_breakpoint_type(special_breakpoints[i])] }
     )
   end
@@ -106,28 +106,28 @@ function M.create_virt_text_chunks_by_breakpoints(breakpoints)
     suffix = suffix(last_special_breakpoint) or ""
   end
 
-  table.insert(virt_texts, {
+  table.insert(virtual_texts, {
     string.format("%s%s", message:gsub("\r", ""):gsub("\n", "  "), suffix),
     virtual_text_highlight_list[last_breakpoint_type],
   })
 
-  return virt_texts
+  return virtual_texts
 end
 
-function M.show_line_breakpoint_info_in_virt_text(_line, _bufnr)
+function M.show_line_breakpoint_info_in_virtual_text(_line, _bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
   local line = _line or vim.fn.line(".")
 
-  local virt_text_ns = vim.api.nvim_create_namespace(namespace)
+  local _namespace = vim.api.nvim_create_namespace(namespace)
   local breakpoints = breakpoint.get_breakpoints_on_line(line, bufnr)
-  local virt_text = M.create_virt_text_chunks_by_breakpoints(breakpoints)
+  local virtual_text = M.create_virtual_text_chunks_by_breakpoints(breakpoints)
 
   local cached_buffer_info = virtual_text_list[bufnr] or {}
   if vim.fn.bufloaded(bufnr) ~= 0 then
-    local success, id = pcall(vim.api.nvim_buf_set_extmark, bufnr, virt_text_ns, line - 1, 0, {
+    local success, id = pcall(vim.api.nvim_buf_set_extmark, bufnr, _namespace, line - 1, 0, {
       hl_mode = "combine",
       id = cached_buffer_info[line],
-      virt_text = virt_text,
+      virt_text = virtual_text,
     })
     if success then
       virtual_text_list[bufnr] = vim.tbl_deep_extend("force", cached_buffer_info, { [line] = id })
@@ -135,7 +135,7 @@ function M.show_line_breakpoint_info_in_virt_text(_line, _bufnr)
   end
 end
 
-function M.show_buffer_breakpoint_info_in_virt_text(_bufnr)
+function M.show_buffer_breakpoint_info_in_virtual_text(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 
   local breakpoints = breakpoint.get_breakpoints_in_buffer(bufnr)
@@ -144,15 +144,15 @@ function M.show_buffer_breakpoint_info_in_virt_text(_bufnr)
   end
 
   for _, _breakpoint in ipairs(breakpoints) do
-    M.show_line_breakpoint_info_in_virt_text(_breakpoint.line, bufnr)
+    M.show_line_breakpoint_info_in_virtual_text(_breakpoint.line, bufnr)
   end
 end
 
-function M.reload_buffer_virt_text(_bufnr)
+function M.reload_buffer_virtual_text(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 
-  M.clear_virt_text_in_buffer(bufnr)
-  M.show_buffer_breakpoint_info_in_virt_text(bufnr)
+  M.clear_virtual_text_in_buffer(bufnr)
+  M.show_buffer_breakpoint_info_in_virtual_text(bufnr)
 end
 
 return M
