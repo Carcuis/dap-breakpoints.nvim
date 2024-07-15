@@ -28,7 +28,19 @@ function M.show_popup(opts)
     width = width + 1,
   }
   local final_opts = vim.tbl_deep_extend("force", DEFAULT_OPTS, opts)
-  vim.lsp.util.open_floating_preview({ opts.message }, opts.syntax, final_opts)
+  local bufnr, _ = vim.lsp.util.open_floating_preview({ opts.message }, opts.syntax, final_opts)
+  vim.bo[bufnr].filetype = opts.syntax
+end
+
+function M.set_input_ui_filetype(filetype)
+  vim.schedule(function()
+    for _, win_id in ipairs(vim.api.nvim_list_wins()) do
+      local bufnr = vim.api.nvim_win_get_buf(win_id)
+      if vim.bo[bufnr].filetype == "DressingInput" then
+          vim.bo[bufnr].filetype = filetype
+      end
+    end
+  end)
 end
 
 return M

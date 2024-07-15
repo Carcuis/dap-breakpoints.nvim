@@ -82,6 +82,7 @@ function M.update_breakpoint_on_current_line()
     return
   end
 
+  local filetype = vim.bo.filetype
   if targetProperty == "condition" then
     vim.ui.input({ prompt = "Breakpoint condition: ", default = target.condition }, function(input)
       M.custom_set_breakpoint(input, nil, nil)
@@ -95,6 +96,7 @@ function M.update_breakpoint_on_current_line()
       M.custom_set_breakpoint(nil, nil, input)
     end)
   end
+  util.set_input_ui_filetype(filetype)
 end
 
 function M.show_breakpoint_property(target, property, silent)
