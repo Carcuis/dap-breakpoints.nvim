@@ -135,7 +135,7 @@ function M.show_breakpoint_virtual_text_on_line(_line, _bufnr)
   end
 end
 
-function M.show_breakpoint_virtual_text_in_buffer(_bufnr)
+function M.show_virtual_text_in_buffer(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 
   local buffer_breakpoints = breakpoint.get_buffer_breakpoints(bufnr)
@@ -148,11 +148,11 @@ function M.show_breakpoint_virtual_text_in_buffer(_bufnr)
   end
 end
 
-function M.reload_buffer_virtual_text(_bufnr)
+function M.reload_virtual_text_in_buffer(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 
   M.clear_virtual_text_in_buffer(bufnr)
-  M.show_breakpoint_virtual_text_in_buffer(bufnr)
+  M.show_virtual_text_in_buffer(bufnr)
 end
 
 return M

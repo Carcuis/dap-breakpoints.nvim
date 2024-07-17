@@ -23,11 +23,11 @@ local setup_commands = function()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpShowVirtText", function()
-    virtual_text.show_breakpoint_virtual_text_in_buffer()
+    virtual_text.show_virtual_text_in_buffer()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpReloadVirtText", function()
-    virtual_text.reload_buffer_virtual_text()
+    virtual_text.reload_virtual_text_in_buffer()
   end, {})
 end
 
