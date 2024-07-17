@@ -51,13 +51,58 @@ function M.go_to_next(opt)
 
   if config.reveal.auto_popup and breakpoint.is_special_breakpoint(target) then
     vim.schedule(function()
-      breakpoint.popup_reveal()
+      M.popup_reveal()
     end)
   end
 end
 
 function M.popup_reveal()
-  breakpoint.popup_reveal()
+  local line_breakpoint = breakpoint.get_line_breakpoint()
+  if line_breakpoint == nil then
+    util.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
+    return
+  end
+
+  local property = ""
+  if line_breakpoint.logMessage ~= nil then
+    property = "logMessage"
+  elseif line_breakpoint.condition ~= nil then
+    property = "condition"
+  elseif line_breakpoint.hitCondition ~= nil then
+    property = "hitCondition"
+  else
+    util.echo_message("No extra properties of this breakpoint.", vim.log.levels.WARN)
+    return
+  end
+
+  local message = line_breakpoint[property]
+  if message == nil then
+    util.echo_message("Breakpoint does not have a " .. property .. " attribute.", vim.log.levels.WARN)
+    return
+  end
+
+  if property == "condition" then
+    local title = "Breakpoint Condition:"
+    util.show_popup({
+      title = title,
+      message = message,
+      syntax = vim.bo.filetype,
+    })
+  elseif property == "hitCondition" then
+    local title = "Breakpoint Hit Count Condition:"
+    util.show_popup({
+      title = title,
+      message = message,
+      syntax = vim.bo.filetype,
+    })
+  else
+    local title = "Log point message:"
+    util.show_popup({
+      title = title,
+      message = "\"" .. message .. "\"",
+      syntax = "lua",
+    })
+  end
 end
 
 function M.update_property()
