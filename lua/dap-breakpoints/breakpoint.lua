@@ -2,7 +2,6 @@ local M = {}
 
 local nvim_dap_breakpoints = require("dap.breakpoints")
 local config = require("dap-breakpoints.config")
-local util = require("dap-breakpoints.util")
 
 function M.get_buffer_breakpoints(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
