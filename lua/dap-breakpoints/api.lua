@@ -138,7 +138,10 @@ function M.update_property()
       breakpoint.custom_set_breakpoint(nil, nil, input and input or target.logMessage)
     end)
   end
-  util.set_input_ui_filetype(filetype)
+
+  if targetProperty ~= "logMessage" then
+    util.set_input_ui_filetype(filetype)
+  end
 end
 
 return M
