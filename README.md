@@ -14,9 +14,9 @@
 require('dap-breakpoints').setup{
   reveal = {
     auto_popup = true,        -- auto show pop up property when navigate to next/prev breakpoint
-    conditional = true,       -- for conditional breakpoints
-    hit_conditional = true,   -- for hit conditional breakpoints
-    log_point = true,         -- for log points
+    conditional = true,       -- enable for conditional breakpoints
+    hit_conditional = true,   -- enable for hit conditional breakpoints
+    log_point = true,         -- enable for log points
   },
   virtual_text = {
     enable = true,
