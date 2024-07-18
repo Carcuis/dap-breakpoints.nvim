@@ -1,7 +1,6 @@
 local M = {}
 
 local api = require("dap-breakpoints.api")
-local virtual_text = require("dap-breakpoints.virtual-text")
 local config = require("dap-breakpoints.config")
 
 local setup_commands = function()
@@ -18,16 +17,16 @@ local setup_commands = function()
     api.update_property()
   end, {})
 
-  vim.api.nvim_create_user_command("DapBpClearVirtText", function()
-    virtual_text.clear_virtual_text_in_buffer()
+  vim.api.nvim_create_user_command("DapBpVirtTextDisable", function()
+    api.disable_virtual_text_in_buffer()
   end, {})
 
-  vim.api.nvim_create_user_command("DapBpShowVirtText", function()
-    virtual_text.show_virtual_text_in_buffer()
+  vim.api.nvim_create_user_command("DapBpVirtTextEnable", function()
+    api.enable_virtual_text_in_buffer()
   end, {})
 
-  vim.api.nvim_create_user_command("DapBpReloadVirtText", function()
-    virtual_text.reload_virtual_text_in_buffer()
+  vim.api.nvim_create_user_command("DapBpVirtTextUpdate", function()
+    api.update_virtual_text_in_buffer()
   end, {})
 end
 

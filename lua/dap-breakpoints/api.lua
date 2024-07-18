@@ -3,6 +3,7 @@ local M = {}
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
 local util = require("dap-breakpoints.util")
+local virtual_text = require("dap-breakpoints.virtual-text")
 
 function M.go_to_previous()
   M.go_to_next({ reverse = true })
@@ -49,7 +50,7 @@ function M.go_to_next(opt)
 
   vim.fn.cursor({ target.line, start_column })
 
-  if config.reveal.auto_popup and breakpoint.is_special_breakpoint(target) then
+  if config.reveal.auto_popup and not breakpoint.is_normal_breakpoint(target) then
     vim.schedule(function()
       M.popup_reveal()
     end)
@@ -113,14 +114,14 @@ function M.update_property()
   end
 
   local targetProperty
-  if target.logMessage ~= nil then
+  if breakpoint.is_log_point(target) then
     targetProperty = "logMessage"
-  elseif target.condition ~= nil then
+  elseif breakpoint.is_conditional_breakpoint(target) then
     targetProperty = "condition"
-  elseif target.hitCondition ~= nil then
+  elseif breakpoint.is_hit_condition_breakpoint(target) then
     targetProperty = "hitCondition"
   else
-    util.echo_message("Ignoring since this is not a special breakpoint.", vim.log.levels.WARN)
+    util.echo_message("Unable to update property of a normal breakpoint.", vim.log.levels.WARN)
     return
   end
 
@@ -142,6 +143,30 @@ function M.update_property()
   if targetProperty ~= "logMessage" then
     util.set_input_ui_filetype(filetype)
   end
+end
+
+function M.disable_virtual_text_in_buffer(_bufnr)
+  virtual_text.disable_virtual_text_in_buffer(_bufnr)
+end
+
+function M.enable_virtual_text_in_buffer(_bufnr)
+  local bufnr = _bufnr or vim.fn.bufnr()
+
+  local buffer_breakpoints = breakpoint.get_buffer_breakpoints(bufnr)
+  if buffer_breakpoints == nil then
+    return
+  end
+
+  for _, line_breakpoint in ipairs(buffer_breakpoints) do
+    virtual_text.enable_virtual_text_on_line(line_breakpoint.line, bufnr)
+  end
+end
+
+function M.update_virtual_text_in_buffer(_bufnr)
+  local bufnr = _bufnr or vim.fn.bufnr()
+
+  M.disable_virtual_text_in_buffer(bufnr)
+  M.enable_virtual_text_in_buffer(bufnr)
 end
 
 return M

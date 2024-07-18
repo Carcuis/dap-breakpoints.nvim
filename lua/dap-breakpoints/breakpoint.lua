@@ -32,12 +32,20 @@ function M.get_line_breakpoint(_line, _bufnr)
   return nil
 end
 
-function M.is_special_breakpoint(target)
-  if target.logMessage ~= nil or target.condition ~= nil or target.hitCondition ~= nil then
-    return true
-  else
-    return false
-  end
+function M.is_log_point(target)
+  return target.logMessage ~= nil
+end
+
+function M.is_conditional_breakpoint(target)
+  return target.condition ~= nil
+end
+
+function M.is_hit_condition_breakpoint(target)
+  return target.hitCondition ~= nil
+end
+
+function M.is_normal_breakpoint(target)
+  return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
 end
 
 function M.custom_set_breakpoint(condition, hit_condition, log_message)

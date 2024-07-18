@@ -4,7 +4,7 @@ config = {
   reveal = {
     auto_popup = true,        -- auto show pop up property when navigate to next/prev breakpoint
     conditional = true,       -- enable for conditional breakpoints
-    hit_conditional = true,   -- enable for hit conditional breakpoints
+    hit_condition = true,   -- enable for hit conditional breakpoints
     log_point = true,         -- enable for log points
   },
   virtual_text = {
