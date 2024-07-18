@@ -65,11 +65,11 @@ function M.popup_reveal()
   end
 
   local property = ""
-  if line_breakpoint.logMessage ~= nil then
+  if breakpoint.is_log_point(line_breakpoint) then
     property = "logMessage"
-  elseif line_breakpoint.condition ~= nil then
+  elseif breakpoint.is_conditional_breakpoint(line_breakpoint) then
     property = "condition"
-  elseif line_breakpoint.hitCondition ~= nil then
+  elseif breakpoint.is_hit_condition_breakpoint(line_breakpoint) then
     property = "hitCondition"
   else
     util.echo_message("No extra properties of this breakpoint.", vim.log.levels.WARN)

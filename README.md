@@ -70,4 +70,3 @@ Reloads virtual text revealing information about breakpoints within current buff
 ## References
 
 - [dap-info](https://github.com/jonathan-elize/dap-info.nvim)
-
