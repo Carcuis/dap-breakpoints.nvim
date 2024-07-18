@@ -19,8 +19,8 @@ function M.get_virtual_text_hl_group(_breakpoint)
   end
 end
 
-function M.clear_virtual_text_on_line(_line, _bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+function M.clear_virtual_text_on_line(_line)
+  local bufnr = vim.fn.bufnr()
   local line = _line or vim.fn.line(".")
 
   local extmarks = vim.api.nvim_buf_get_extmarks(
@@ -38,10 +38,10 @@ function M.clear_virtual_text_on_line(_line, _bufnr)
   end
 end
 
-function M.generate_virtual_text_by_breakpoint(_breakpoint)
+function M.generate_virtual_text_by_breakpoint(target)
   local special_breakpoints = {}
-  if not breakpoint.is_normal_breakpoint(_breakpoint) then
-    special_breakpoints[#special_breakpoints + 1] = _breakpoint
+  if not breakpoint.is_normal_breakpoint(target) then
+    special_breakpoints[#special_breakpoints + 1] = target
   end
 
   if #special_breakpoints == 0 then
@@ -88,11 +88,11 @@ function M.generate_virtual_text_by_breakpoint(_breakpoint)
   return virtual_texts
 end
 
-function M.enable_virtual_text_on_line(_line, _bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+function M.enable_virtual_text_on_line(_line)
   local line = _line or vim.fn.line(".")
+  local bufnr = vim.fn.bufnr()
 
-  local line_breakpoint = breakpoint.get_line_breakpoint(line, bufnr)
+  local line_breakpoint = breakpoint.get_line_breakpoint(line)
   local virtual_text = M.generate_virtual_text_by_breakpoint(line_breakpoint)
 
   local virtual_text_id_in_buffer = virtual_text_ids_list[bufnr] or {}
@@ -108,8 +108,8 @@ function M.enable_virtual_text_on_line(_line, _bufnr)
   end
 end
 
-function M.disable_virtual_text_in_buffer(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+function M.disable_virtual_text()
+  local bufnr = vim.fn.bufnr()
   local virtual_text_ids_in_buffer = virtual_text_ids_list[bufnr]
   if virtual_text_ids_in_buffer ~= nil then
     for line, _ in pairs(virtual_text_ids_in_buffer) do

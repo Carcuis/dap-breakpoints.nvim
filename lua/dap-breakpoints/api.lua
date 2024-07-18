@@ -145,28 +145,24 @@ function M.update_property()
   end
 end
 
-function M.disable_virtual_text_in_buffer(_bufnr)
-  virtual_text.disable_virtual_text_in_buffer(_bufnr)
+function M.disable_virtual_text()
+  virtual_text.disable_virtual_text()
 end
 
-function M.enable_virtual_text_in_buffer(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
-
-  local buffer_breakpoints = breakpoint.get_buffer_breakpoints(bufnr)
+function M.enable_virtual_text()
+  local buffer_breakpoints = breakpoint.get_buffer_breakpoints()
   if buffer_breakpoints == nil then
     return
   end
 
   for _, line_breakpoint in ipairs(buffer_breakpoints) do
-    virtual_text.enable_virtual_text_on_line(line_breakpoint.line, bufnr)
+    virtual_text.enable_virtual_text_on_line(line_breakpoint.line)
   end
 end
 
-function M.update_virtual_text_in_buffer(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
-
-  M.disable_virtual_text_in_buffer(bufnr)
-  M.enable_virtual_text_in_buffer(bufnr)
+function M.reload_virtual_text()
+  M.disable_virtual_text()
+  M.enable_virtual_text()
 end
 
 return M

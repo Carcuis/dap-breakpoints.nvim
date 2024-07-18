@@ -18,15 +18,15 @@ local setup_commands = function()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpVirtTextDisable", function()
-    api.disable_virtual_text_in_buffer()
+    api.disable_virtual_text()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpVirtTextEnable", function()
-    api.enable_virtual_text_in_buffer()
+    api.enable_virtual_text()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpVirtTextUpdate", function()
-    api.update_virtual_text_in_buffer()
+    api.reload_virtual_text()
   end, {})
 end
 

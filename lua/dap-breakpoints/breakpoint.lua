@@ -3,8 +3,8 @@ local M = {}
 local nvim_dap_breakpoints = require("dap.breakpoints")
 local config = require("dap-breakpoints.config")
 
-function M.get_buffer_breakpoints(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+function M.get_buffer_breakpoints()
+  local bufnr = vim.fn.bufnr()
 
   local buffer_breakpoints = nvim_dap_breakpoints.get()[bufnr]
   if buffer_breakpoints == nil or #buffer_breakpoints == 0 then
@@ -14,11 +14,10 @@ function M.get_buffer_breakpoints(_bufnr)
   return buffer_breakpoints
 end
 
-function M.get_line_breakpoint(_line, _bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+function M.get_line_breakpoint(_line)
   local line = _line or vim.fn.line(".")
 
-  local buffer_breakpoints = M.get_buffer_breakpoints(bufnr)
+  local buffer_breakpoints = M.get_buffer_breakpoints()
   if buffer_breakpoints == nil then
     return nil
   end
@@ -51,7 +50,7 @@ end
 function M.custom_set_breakpoint(condition, hit_condition, log_message)
   local dap = require("dap")
   dap.set_breakpoint(condition, hit_condition, log_message)
-  if config.on_set_breakpoint ~= nil then
+  if type(config.on_set_breakpoint) == "function" then
     config.on_set_breakpoint(condition, hit_condition, log_message)
   end
 end
