@@ -113,15 +113,16 @@ function M.edit_property()
   local filetype = vim.bo.filetype
   if breakpoint.is_conditional_breakpoint(_breakpoint) then
     vim.ui.input({ prompt = "Edit breakpoint condition: ", default = _breakpoint.condition }, function(input)
-      breakpoint.custom_set_breakpoint(input and input or _breakpoint.condition, nil, nil)
+      -- breakpoint.set_breakpoint(input and input or _breakpoint.condition, nil, nil)
+      breakpoint.set_breakpoint({ condition = input and input or _breakpoint.condition })
     end)
   elseif breakpoint.is_hit_condition_breakpoint(_breakpoint) then
     vim.ui.input({ prompt = "Edit hit condition: ", default = _breakpoint.hitCondition }, function(input)
-      breakpoint.custom_set_breakpoint(nil, input and input or _breakpoint.hitCondition, nil)
+      breakpoint.set_breakpoint({ hit_condition = input and input or _breakpoint.hitCondition })
     end)
   else
     vim.ui.input({ prompt = "Edit log point message: ", default = _breakpoint.logMessage }, function(input)
-      breakpoint.custom_set_breakpoint(nil, nil, input and input or _breakpoint.logMessage)
+      breakpoint.set_breakpoint({ log_message = input and input or _breakpoint.logMessage })
     end)
   end
 

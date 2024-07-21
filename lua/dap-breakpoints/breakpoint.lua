@@ -69,10 +69,17 @@ function M.is_normal_breakpoint(target)
   return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
 end
 
-function M.custom_set_breakpoint(condition, hit_condition, log_message)
-  nvim_dap.set_breakpoint(condition, hit_condition, log_message)
+function M.set_breakpoint(opt)
+  for _, prop in ipairs({"condition", "hit_condition", "log_message"}) do
+    if opt[prop] == "" then
+      opt[prop] = nil
+    end
+  end
+
+  nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
+
   if type(config.on_set_breakpoint) == "function" then
-    config.on_set_breakpoint(condition, hit_condition, log_message)
+    config.on_set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
   end
 end
 
