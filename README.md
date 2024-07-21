@@ -22,9 +22,14 @@ require('dap-breakpoints').setup{
     enable = true,
     current_line_only = false,
     aligned = false,
-    prefix = "󰻂 ",
-    suffix = "",
     spacing = 4,
+    prefix = {
+      normal = "",
+      log_point = "󰰍 ",
+      conditional = "󰯲 ",
+      hit_condition = "󰰁 ",
+    },
+    custom_text_handler = nil, -- function(target)
   },
   on_set_breakpoint = nil,
 }
@@ -34,38 +39,42 @@ require('dap-breakpoints').setup{
 
 ### :DapBpNext
 
-Goes to the next breakpoint in file and tries to reveal info about it if possible
+Go to the next breakpoint in file.
 
 ### :DapBpPrev
 
-Goes to the previous breakpoint in file and tries to reveal info about it if possible
+Go to the previous breakpoint in file.
 
 ### :DapBpReveal
 
-Tries to reveal info about the breakpoint on the current line if possible
+Reveal popup info about current breakpoint.
 
-### :DapBpUpdate
+### :DapBpEdit
 
-Tries to allow you to update a log point message or breakpoint condition for a breakpoint on the line you are currently on.
+Edit log point message or breakpoint condition for current breakpoint.
 
-### :DapBpClearVirtText
+### :DapBpVirtEnable
 
-Clears virtual text revealing information about breakpoints within current buffer.
+Show virtual text information about breakpoints.
 
-### :DapBpShowVirtText
+### :DapBpVirtDisable
 
-Shows virtual text revealing information about breakpoints within current buffer.
+Clear virtual text information about breakpoints.
 
-### :DapBpReloadVirtText
+### :DapBpVirtToggle
 
-Reloads virtual text revealing information about breakpoints within current buffer. (Essentially the same as running `DapBpClearVirtText` and `DapBpShowVirtText` one after another)
+Toggle virtual text information about breakpoints.
 
 ## Highlight Groups
 
-- `DapBreakpointVirtualText`
-- `DapLogPointVirtualText`
-- `DapConditionalPointVirtualText`
-- `DapHitConditionPointVirtualText`
+- `DapBreakpointVirt`
+- `DapBreakpointVirtPrefix`
+- `DapLogPointVirt`
+- `DapLogPointVirtPrefix`
+- `DapConditionalPointVirt`
+- `DapConditionalPointVirtPrefix`
+- `DapHitConditionPointVirt`
+- `DapHitConditionPointVirtPrefix`
 
 ## References
 

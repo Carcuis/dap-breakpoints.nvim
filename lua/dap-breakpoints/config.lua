@@ -8,12 +8,17 @@ config = {
     log_point = true,         -- enable for log points
   },
   virtual_text = {
-    enable = true,
+    enabled = true,
     current_line_only = false,
     aligned = false,
-    prefix = "󰻂 ",
-    suffix = "",
     spacing = 4,
+    prefix = {
+      normal = "",
+      log_point = "󰰍 ",
+      conditional = "󰯲 ",
+      hit_condition = "󰰁 ",
+    },
+    custom_text_handler = nil, -- function(target)
   },
   on_set_breakpoint = nil,
 }

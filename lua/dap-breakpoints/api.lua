@@ -16,41 +16,49 @@ function M.go_to_next(opt)
     return
   end
 
-  local target
-  local original_position = vim.fn.getcurpos()
-  local start_line = original_position[2]
-  local start_column = original_position[3]
+  local count = #buffer_breakpoints
+  local num
+  local next
 
-  -- NOTE: assumes breakpoints are in order by line number
-  if opt and opt.reverse then
-    for _, line_breakpoint in ipairs(buffer_breakpoints) do
-      if line_breakpoint.line < start_line then
-        target = line_breakpoint
-      end
-    end
-    if target == nil then
-      target = buffer_breakpoints[#buffer_breakpoints]
-    end
+  local reverse = opt and opt.reverse
+  if reverse then
+    num = count
+    next = buffer_breakpoints[count]
   else
-    for _, value in ipairs(buffer_breakpoints) do
-      if value.line > start_line then
-        target = value
+    num = 1
+    next = buffer_breakpoints[1]
+  end
+
+  local _position = vim.fn.getcurpos()
+  local _line = _position[2]
+  local _column = _position[3]
+
+  for _num, _breakpoint in ipairs(buffer_breakpoints) do
+    if reverse then
+      if _breakpoint.line < _line then
+        next = _breakpoint
+        num = _num
+      else
+        break
+      end
+    else
+      if _breakpoint.line > _line then
+        next = _breakpoint
+        num = _num
         break
       end
     end
-    if target == nil then
-      target = buffer_breakpoints[1]
-    end
   end
 
-  if target.line == start_line then
-    util.echo_message("Already at only breakpoint.", vim.log.levels.WARN)
+  util.echo_message("Breakpoint " .. num .." of " .. count, vim.log.levels.INFO)
+
+  if next.line == _line then
     return
   end
 
-  vim.fn.cursor({ target.line, start_column })
+  vim.fn.cursor({ next.line, _column })
 
-  if config.reveal.auto_popup and not breakpoint.is_normal_breakpoint(target) then
+  if config.reveal.auto_popup and not breakpoint.is_normal_breakpoint(next) then
     vim.schedule(function()
       M.popup_reveal()
     end)
@@ -58,111 +66,98 @@ function M.go_to_next(opt)
 end
 
 function M.popup_reveal()
-  local line_breakpoint = breakpoint.get_line_breakpoint()
-  if line_breakpoint == nil then
+  local _breakpoint = breakpoint.get_breakpoint()
+  if _breakpoint == nil then
     util.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
     return
   end
 
-  local property = ""
-  if breakpoint.is_log_point(line_breakpoint) then
-    property = "logMessage"
-  elseif breakpoint.is_conditional_breakpoint(line_breakpoint) then
-    property = "condition"
-  elseif breakpoint.is_hit_condition_breakpoint(line_breakpoint) then
-    property = "hitCondition"
-  else
-    util.echo_message("No extra properties of this breakpoint.", vim.log.levels.WARN)
+  if breakpoint.is_normal_breakpoint(_breakpoint) then
+    util.echo_message("No extra properties.", vim.log.levels.WARN)
     return
   end
 
-  local message = line_breakpoint[property]
-  if message == nil then
-    util.echo_message("Breakpoint does not have a " .. property .. " attribute.", vim.log.levels.WARN)
-    return
-  end
-
-  if property == "condition" then
-    local title = "Breakpoint Condition:"
+  if breakpoint.is_conditional_breakpoint(_breakpoint) then
     util.show_popup({
-      title = title,
-      message = message,
+      title = "Breakpoint Condition:",
+      message = _breakpoint["condition"],
       syntax = vim.bo.filetype,
     })
-  elseif property == "hitCondition" then
-    local title = "Breakpoint Hit Count Condition:"
+  elseif breakpoint.is_hit_condition_breakpoint(_breakpoint) then
     util.show_popup({
-      title = title,
-      message = message,
+      title = "Breakpoint Hit Condition:",
+      message = _breakpoint["hitCondition"],
       syntax = vim.bo.filetype,
     })
   else
-    local title = "Log point message:"
     util.show_popup({
-      title = title,
-      message = "\"" .. message .. "\"",
+      title = "Log point message:",
+      message = "\"" .. _breakpoint["logMessage"] .. "\"",
       syntax = "lua",
     })
   end
 end
 
-function M.update_property()
-  local target = breakpoint.get_line_breakpoint()
-  if target == nil then
+function M.edit_property()
+  local _breakpoint = breakpoint.get_breakpoint()
+  if _breakpoint == nil then
     util.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
     return
   end
 
-  local targetProperty
-  if breakpoint.is_log_point(target) then
-    targetProperty = "logMessage"
-  elseif breakpoint.is_conditional_breakpoint(target) then
-    targetProperty = "condition"
-  elseif breakpoint.is_hit_condition_breakpoint(target) then
-    targetProperty = "hitCondition"
-  else
-    util.echo_message("Unable to update property of a normal breakpoint.", vim.log.levels.WARN)
+  if breakpoint.is_normal_breakpoint(_breakpoint) then
+    util.echo_message("No extra properties to edit.", vim.log.levels.WARN)
     return
   end
 
   local filetype = vim.bo.filetype
-  if targetProperty == "condition" then
-    vim.ui.input({ prompt = "Edit breakpoint condition: ", default = target.condition }, function(input)
-      breakpoint.custom_set_breakpoint(input and input or target.condition, nil, nil)
+  if breakpoint.is_conditional_breakpoint(_breakpoint) then
+    vim.ui.input({ prompt = "Edit breakpoint condition: ", default = _breakpoint.condition }, function(input)
+      breakpoint.custom_set_breakpoint(input and input or _breakpoint.condition, nil, nil)
     end)
-  elseif targetProperty == "hitCondition" then
-    vim.ui.input({ prompt = "Edit hit count condition: ", default = target.hitCondition }, function(input)
-      breakpoint.custom_set_breakpoint(nil, input and input or target.hitCondition, nil)
+  elseif breakpoint.is_hit_condition_breakpoint(_breakpoint) then
+    vim.ui.input({ prompt = "Edit hit condition: ", default = _breakpoint.hitCondition }, function(input)
+      breakpoint.custom_set_breakpoint(nil, input and input or _breakpoint.hitCondition, nil)
     end)
   else
-    vim.ui.input({ prompt = "Edit log point message: ", default = target.logMessage }, function(input)
-      breakpoint.custom_set_breakpoint(nil, nil, input and input or target.logMessage)
+    vim.ui.input({ prompt = "Edit log point message: ", default = _breakpoint.logMessage }, function(input)
+      breakpoint.custom_set_breakpoint(nil, nil, input and input or _breakpoint.logMessage)
     end)
   end
 
-  if targetProperty ~= "logMessage" then
+  if not breakpoint.is_log_point(_breakpoint) then
     util.set_input_ui_filetype(filetype)
   end
 end
 
 function M.disable_virtual_text()
-  virtual_text.disable_virtual_text()
+  for bufnr, _ in pairs(breakpoint.get_all_breakpoints()) do
+    vim.api.nvim_buf_clear_namespace(bufnr, virtual_text.get_ns_id(), 0, -1)
+  end
+
+  virtual_text.enabled = false
 end
 
+-- TODO: enable for all buffers
 function M.enable_virtual_text()
   local buffer_breakpoints = breakpoint.get_buffer_breakpoints()
   if buffer_breakpoints == nil then
     return
   end
 
-  for _, line_breakpoint in ipairs(buffer_breakpoints) do
-    virtual_text.enable_virtual_text_on_line(line_breakpoint.line)
+  for _, _breakpoint in ipairs(buffer_breakpoints) do
+    virtual_text.enable_virtual_text_on_breakpoint(_breakpoint)
   end
+
+  virtual_text.enabled = true
 end
 
-function M.reload_virtual_text()
-  M.disable_virtual_text()
-  M.enable_virtual_text()
+function M.toggle_virtual_text()
+  if virtual_text.enabled then
+    M.disable_virtual_text()
+  else
+    M.enable_virtual_text()
+  end
 end
 
 return M

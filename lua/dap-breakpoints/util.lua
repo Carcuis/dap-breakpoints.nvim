@@ -1,17 +1,13 @@
 local M = {}
 
-function M.echo_message(message, log_level)
-  local log_hl = {
-    [vim.log.levels.ERROR] = "ErrorMsg",
-    [vim.log.levels.WARN] = "WarningMsg",
-  }
-  local default_log_hl = "None"
-  local final_log_hl = log_level == nil and default_log_hl or log_hl[log_level]
+local message_highlight_map = {
+  [vim.log.levels.INFO] = "MsgArea",
+  [vim.log.levels.WARN] = "WarningMsg",
+  [vim.log.levels.ERROR] = "ErrorMsg",
+}
 
-  vim.cmd("echohl " .. final_log_hl .. " | echo '" .. message .. "' | echohl " .. default_log_hl)
-  vim.defer_fn(function()
-    vim.cmd('echon ""')
-  end, 2000)
+function M.echo_message(message, level)
+  vim.api.nvim_echo({{ message, message_highlight_map[level] or "MsgArea" }}, false, {})
 end
 
 function M.show_popup(opts)
@@ -22,12 +18,12 @@ function M.show_popup(opts)
   if string.len(opts.title) > width then
     width = string.len(opts.title)
   end
-  local DEFAULT_OPTS = {
+  local default_opts = {
     border = "single",
     title_pos = "left",
     width = width + 1,
   }
-  local final_opts = vim.tbl_deep_extend("force", DEFAULT_OPTS, opts)
+  local final_opts = vim.tbl_deep_extend("force", default_opts, opts)
   local bufnr, _ = vim.lsp.util.open_floating_preview({ opts.message }, opts.syntax, final_opts)
   vim.bo[bufnr].filetype = opts.syntax
 end
@@ -37,7 +33,8 @@ function M.set_input_ui_filetype(filetype)
     for _, win_id in ipairs(vim.api.nvim_list_wins()) do
       local bufnr = vim.api.nvim_win_get_buf(win_id)
       if vim.bo[bufnr].filetype == "DressingInput" then
-          vim.bo[bufnr].filetype = filetype
+        vim.bo[bufnr].filetype = filetype
+        break
       end
     end
   end)
