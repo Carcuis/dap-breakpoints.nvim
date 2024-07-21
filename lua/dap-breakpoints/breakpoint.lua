@@ -2,7 +2,6 @@ local M = {}
 
 local nvim_dap = require("dap")
 local nvim_dap_breakpoints = require("dap.breakpoints")
-local config = require("dap-breakpoints.config")
 
 function M.get_all_breakpoints()
   return nvim_dap_breakpoints.get()
@@ -70,17 +69,7 @@ function M.is_normal_breakpoint(target)
 end
 
 function M.set_breakpoint(opt)
-  for _, prop in ipairs({"condition", "hit_condition", "log_message"}) do
-    if opt[prop] == "" then
-      opt[prop] = nil
-    end
-  end
-
   nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
-
-  if type(config.on_set_breakpoint) == "function" then
-    config.on_set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
-  end
 end
 
 return M

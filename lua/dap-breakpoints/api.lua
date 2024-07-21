@@ -114,15 +114,15 @@ function M.edit_property()
   if breakpoint.is_conditional_breakpoint(_breakpoint) then
     vim.ui.input({ prompt = "Edit breakpoint condition: ", default = _breakpoint.condition }, function(input)
       -- breakpoint.set_breakpoint(input and input or _breakpoint.condition, nil, nil)
-      breakpoint.set_breakpoint({ condition = input and input or _breakpoint.condition })
+      M.set_breakpoint({ condition = input and input or _breakpoint.condition })
     end)
   elseif breakpoint.is_hit_condition_breakpoint(_breakpoint) then
     vim.ui.input({ prompt = "Edit hit condition: ", default = _breakpoint.hitCondition }, function(input)
-      breakpoint.set_breakpoint({ hit_condition = input and input or _breakpoint.hitCondition })
+      M.set_breakpoint({ hit_condition = input and input or _breakpoint.hitCondition })
     end)
   else
     vim.ui.input({ prompt = "Edit log point message: ", default = _breakpoint.logMessage }, function(input)
-      breakpoint.set_breakpoint({ log_message = input and input or _breakpoint.logMessage })
+      M.set_breakpoint({ log_message = input and input or _breakpoint.logMessage })
     end)
   end
 
@@ -158,6 +158,24 @@ function M.toggle_virtual_text()
     M.disable_virtual_text()
   else
     M.enable_virtual_text()
+  end
+end
+
+function M.set_breakpoint(opt)
+  for _, prop in ipairs({"condition", "hit_condition", "log_message"}) do
+    if opt[prop] == "" then
+      opt[prop] = nil
+    end
+  end
+
+  breakpoint.set_breakpoint(opt)
+
+  if virtual_text.enabled then
+    virtual_text.enable_virtual_text_on_breakpoint(opt)
+  end
+
+  if type(config.on_set_breakpoint) == "function" then
+    config.on_set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
   end
 end
 
