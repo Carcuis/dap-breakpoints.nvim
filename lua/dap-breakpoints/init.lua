@@ -7,12 +7,15 @@ local setup_commands = function()
   vim.api.nvim_create_user_command("DapBpNext", function()
     api.go_to_next()
   end, {})
+
   vim.api.nvim_create_user_command("DapBpPrev", function()
     api.go_to_previous()
   end, {})
+
   vim.api.nvim_create_user_command("DapBpReveal", function()
     api.popup_reveal()
   end, {})
+
   vim.api.nvim_create_user_command("DapBpEdit", function()
     api.edit_property()
   end, {})
