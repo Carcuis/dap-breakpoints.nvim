@@ -1,6 +1,6 @@
 # dap-breakpoints.nvim
 
-`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage breakpoints and display virtual texts with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
+`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage breakpoints and display virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
 
 ## Requirements
 
