@@ -16,8 +16,36 @@ local setup_commands = function()
     api.popup_reveal()
   end, {})
 
+  vim.api.nvim_create_user_command("DapBpLoad", function()
+    api.load_breakpoints()
+  end, {})
+
+  vim.api.nvim_create_user_command("DapBpSave", function()
+    api.save_breakpoints()
+  end, {})
+
   vim.api.nvim_create_user_command("DapBpEdit", function()
     api.edit_property()
+  end, {})
+
+  vim.api.nvim_create_user_command("DapBpToggle", function()
+    api.toggle_breakpoint()
+  end, {})
+
+  vim.api.nvim_create_user_command("DapBpSetConditionalPoint", function()
+    api.set_conditional_breakpoint()
+  end, {})
+
+  vim.api.nvim_create_user_command("DapBpSetHitConditionPoint", function()
+    api.set_hit_condition_breakpoint()
+  end, {})
+
+  vim.api.nvim_create_user_command("DapBpSetLogPoint", function()
+    api.set_log_point()
+  end, {})
+
+  vim.api.nvim_create_user_command("DapBpClearAll", function()
+    api.clear_all_breakpoints()
   end, {})
 
   vim.api.nvim_create_user_command("DapBpVirtEnable", function()
@@ -57,6 +85,13 @@ M.setup = function(opt)
 
   setup_commands()
   setup_highlight_groups()
+
+  if config.breakpoint.auto_load then
+    -- TODO: add autogroup
+    vim.api.nvim_create_autocmd({ "BufReadPost" }, { callback = function()
+      api.load_breakpoints()
+    end})
+  end
 end
 
 return M

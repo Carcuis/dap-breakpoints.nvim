@@ -11,7 +11,7 @@ end
 
 function M.go_to_next(opt)
   local buffer_breakpoints = breakpoint.get_buffer_breakpoints()
-  if buffer_breakpoints == nil then
+  if #buffer_breakpoints == 0 then
     util.echo_message("No breakpoints in current buffer.", vim.log.levels.WARN)
     return
   end
@@ -132,22 +132,17 @@ function M.edit_property()
 end
 
 function M.disable_virtual_text()
-  for bufnr, _ in pairs(breakpoint.get_all_breakpoints()) do
-    vim.api.nvim_buf_clear_namespace(bufnr, virtual_text.get_ns_id(), 0, -1)
-  end
-
+  virtual_text.clear_all_virtual_text()
   virtual_text.enabled = false
 end
 
--- TODO: enable for all buffers
 function M.enable_virtual_text()
-  local buffer_breakpoints = breakpoint.get_buffer_breakpoints()
-  if buffer_breakpoints == nil then
-    return
+  if virtual_text.enabled then
+    virtual_text.clear_all_virtual_text()
   end
 
-  for _, _breakpoint in ipairs(buffer_breakpoints) do
-    virtual_text.enable_virtual_text_on_breakpoint(_breakpoint)
+  for bufnr, _ in pairs(breakpoint.get_all_breakpoints()) do
+    virtual_text.enable_virtual_text_in_buffer(bufnr)
   end
 
   virtual_text.enabled = true
@@ -161,22 +156,78 @@ function M.toggle_virtual_text()
   end
 end
 
+function M.load_breakpoints()
+  breakpoint.load_breakpoints()
+  if virtual_text.enabled then
+    M.disable_virtual_text()
+    M.enable_virtual_text()
+  end
+end
+
+function M.save_breakpoints()
+  breakpoint.save_breakpoints()
+end
+
 function M.set_breakpoint(opt)
-  for _, prop in ipairs({"condition", "hit_condition", "log_message"}) do
-    if opt[prop] == "" then
-      opt[prop] = nil
+  if opt then
+    for _, prop in ipairs({ "condition", "hit_condition", "log_message" }) do
+      if opt[prop] == "" then
+        opt[prop] = nil
+      end
     end
   end
 
   breakpoint.set_breakpoint(opt)
 
   if virtual_text.enabled then
-    virtual_text.enable_virtual_text_on_breakpoint(opt)
+    virtual_text.clear_virtual_text_on_line()
+    virtual_text.enable_virtual_text_on_line()
   end
+end
 
-  if type(config.on_set_breakpoint) == "function" then
-    config.on_set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
+function M.toggle_breakpoint()
+  if breakpoint.get_breakpoint() then
+    breakpoint.toggle_breakpoint()
+
+    if virtual_text.enabled then
+      virtual_text.clear_virtual_text_on_line()
+    end
+  else
+    M.set_breakpoint()
   end
+end
+
+function M.set_conditional_breakpoint()
+  local filetype = vim.bo.filetype
+  vim.ui.input({ prompt = "Conditional point expression: " }, function(input)
+    M.set_breakpoint({ condition = input })
+  end)
+  util.set_input_ui_filetype(filetype)
+end
+
+function M.set_hit_condition_breakpoint()
+  vim.ui.input({ prompt = "Hit condition count: " }, function(input)
+    M.set_breakpoint({ hit_condition = input })
+  end)
+  util.set_input_ui_filetype("lua")
+end
+
+function M.set_log_point()
+  vim.ui.input({ prompt = "Log point message: " }, function(input)
+    M.set_breakpoint({ log_message = input })
+  end)
+  util.set_input_ui_filetype("text")
+end
+
+function M.clear_all_breakpoints()
+  vim.ui.input({ prompt = 'Clear all breakpoints? [y/N] ' }, function(input)
+    if input and string.match(string.lower(input), '^ye?s?$') then
+      if virtual_text.enabled then
+        virtual_text.clear_all_virtual_text()
+      end
+      breakpoint.clear_all_breakpoints()
+    end
+  end)
 end
 
 return M

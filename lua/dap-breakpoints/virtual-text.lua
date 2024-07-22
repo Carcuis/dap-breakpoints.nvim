@@ -1,9 +1,9 @@
-local M = {
-  enabled = false
-}
+local M = {}
 
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
+
+M.enabled = config.virtual_text.enabled
 
 local namespace = "dap-breakpoints"
 local ns_id = vim.api.nvim_create_namespace(namespace)
@@ -24,21 +24,32 @@ function M.get_virtual_text_hl_group(target)
   end
 end
 
-function M.clear_virtual_text_on_line(_line)
-  local bufnr = vim.fn.bufnr()
-  local line = _line or vim.fn.line(".")
+function M.clear_virtual_text_on_line(opt)
+  local bufnr = opt and opt.bufnr or vim.fn.bufnr()
+  local line = opt and opt.line or vim.fn.line(".")
 
   local extmarks = vim.api.nvim_buf_get_extmarks(
     bufnr,
     ns_id,
-    line - 1,
-    line - 1,
+    { line - 1, 0 },
+    { line - 1, -1 },
     { details = true }
   )
 
   for _, extmark in ipairs(extmarks) do
     local mark_line = extmark[2]
     vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark_line, mark_line + 1)
+  end
+end
+
+function M.clear_virtual_text_in_buffer(_bufnr)
+  local bufnr = _bufnr or vim.fn.bufnr()
+  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
+end
+
+function M.clear_all_virtual_text()
+  for bufnr, _ in pairs(breakpoint.get_all_breakpoints()) do
+    M.clear_virtual_text_in_buffer(bufnr)
   end
 end
 
@@ -73,6 +84,10 @@ function M.generate_virtual_text_by_breakpoint(target)
     message = message_map[true] or message
   end
 
+  if prefix == "" and message == "" then
+    return {}
+  end
+
   local virt_text = {
     { string.rep(" ", spacing) },
     { prefix, M.get_virtual_text_hl_group(target) .. "Prefix" },
@@ -82,10 +97,10 @@ function M.generate_virtual_text_by_breakpoint(target)
   return virt_text
 end
 
-function M.enable_virtual_text_on_breakpoint(target)
-  local bufnr = vim.fn.bufnr()
-  local line = target.line
-  local virt_text = M.generate_virtual_text_by_breakpoint(target)
+function M.enable_virtual_text_on_line(opt)
+  local bufnr = opt and opt.bufnr or vim.fn.bufnr()
+  local line = opt and opt.line or vim.fn.line(".")
+  local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint(opt))
 
   if vim.fn.bufloaded(bufnr) ~= 0 then
     vim.api.nvim_buf_set_extmark(
@@ -98,6 +113,15 @@ function M.enable_virtual_text_on_breakpoint(target)
         virt_text = virt_text,
       }
     )
+  end
+end
+
+function M.enable_virtual_text_in_buffer(bufnr)
+  for _, _breakpoint in ipairs( breakpoint.get_buffer_breakpoints(bufnr)) do
+    M.enable_virtual_text_on_line({
+      bufnr = bufnr,
+      line = _breakpoint.line
+    })
   end
 end
 

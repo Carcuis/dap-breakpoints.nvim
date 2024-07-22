@@ -1,6 +1,10 @@
 local config = {}
 
 config = {
+  breakpoint = {
+    auto_load = true,         -- auto load breakpoints on 'BufReadPost'
+    auto_save = true,         -- auto save breakpoints when make changes to breakpoints
+  },
   reveal = {
     auto_popup = true,        -- auto show pop up property when navigate to next/prev breakpoint
     conditional = true,       -- enable for conditional breakpoints
@@ -20,7 +24,6 @@ config = {
     },
     custom_text_handler = nil, -- function(target)
   },
-  on_set_breakpoint = nil,
 }
 
 return config

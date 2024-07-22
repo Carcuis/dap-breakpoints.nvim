@@ -2,6 +2,9 @@ local M = {}
 
 local nvim_dap = require("dap")
 local nvim_dap_breakpoints = require("dap.breakpoints")
+local persistent_breakpoints = require("persistent-breakpoints.api")
+
+local config = require("dap-breakpoints.config")
 
 function M.get_all_breakpoints()
   return nvim_dap_breakpoints.get()
@@ -12,23 +15,18 @@ function M.get_buffer_breakpoints(_bufnr)
 
   local buffer_breakpoints = M.get_all_breakpoints()[bufnr]
   if buffer_breakpoints == nil or #buffer_breakpoints == 0 then
-    return nil
+    return {}
   end
 
   return buffer_breakpoints
 end
 
 function M.get_breakpoint(opt)
-  local bufnr = vim.fn.bufnr()
-  local line = vim.fn.line(".")
-
-  if opt then
-    bufnr = opt.bufnr or bufnr
-    line = opt.line or line
-  end
+  local bufnr = opt and opt.bufnr or vim.fn.bufnr()
+  local line = opt and opt.line or vim.fn.line(".")
 
   local buffer_breakpoints = M.get_buffer_breakpoints(bufnr)
-  if buffer_breakpoints == nil then
+  if #buffer_breakpoints == 0 then
     return nil
   end
 
@@ -68,8 +66,37 @@ function M.is_normal_breakpoint(target)
   return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
 end
 
+function M.load_breakpoints()
+  persistent_breakpoints.load_breakpoints()
+end
+
+function M.save_breakpoints()
+  persistent_breakpoints.breakpoints_changed_in_current_buffer()
+end
+
+function M.auto_save()
+  if config.breakpoint.auto_save then
+    M.save_breakpoints()
+  end
+end
+
 function M.set_breakpoint(opt)
-  nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
+  if opt then
+    nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
+  else
+    nvim_dap.set_breakpoint()
+  end
+  M.auto_save()
+end
+
+function M.toggle_breakpoint()
+  nvim_dap.toggle_breakpoint()
+  M.auto_save()
+end
+
+function M.clear_all_breakpoints()
+  nvim_dap.clear_breakpoints()
+  M.auto_save()
 end
 
 return M
