@@ -87,10 +87,13 @@ M.setup = function(opt)
   setup_highlight_groups()
 
   if config.breakpoint.auto_load then
-    -- TODO: add autogroup
-    vim.api.nvim_create_autocmd({ "BufReadPost" }, { callback = function()
-      api.load_breakpoints()
-    end})
+    local group = vim.api.nvim_create_augroup("dap-breakpoints", { clear = true })
+    vim.api.nvim_create_autocmd({ "BufReadPost" }, {
+      group = group,
+      callback = function()
+        api.load_breakpoints()
+      end
+    })
   end
 end
 
