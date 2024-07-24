@@ -1,12 +1,30 @@
 # dap-breakpoints.nvim
 
-`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage breakpoints and display virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap)
+`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage breakpoints,
+create advanced breakpoints using `vim.ui.input`, and display breakpoint
+properties virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap).
+
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Configuation](#configuation)
+- [Commands](#commands)
+- [Keymaps](#keymaps)
+- [Highlight Groups](#highlight-groups)
+- [Reference](#reference)
 
 ## Requirements
 
-- Neovim 0.10+
+- Neovim >= 0.10
 - [nvim-dap](https://github.com/mfussenegger/nvim-dap)
 - [persistent-breakpoints.nvim](https://github.com/Weissle/persistent-breakpoints.nvim)
+- [dressing.nvim](https://github.com/stevearc/dressing.nvim) (optional)
+
+## Setup
+
+```lua
+require("persistent-breakpoints").setup()
+require("dap-breakpoints").setup()
+```
 
 ## Configuation
 
@@ -38,35 +56,87 @@ require('dap-breakpoints').setup{
 }
 ```
 
-## Usage
+## Commands
 
-### :DapBpNext
+### `DapBpToggle`
 
-Go to the next breakpoint in file.
+Toggle breakpoint at current line.
 
-### :DapBpPrev
+### `DapBpNext`
 
-Go to the previous breakpoint in file.
+Go to the next breakpoint in buffer.
 
-### :DapBpReveal
+### `DapBpPrev`
 
-Reveal popup info about current breakpoint.
+Go to the previous breakpoint in buffer.
 
-### :DapBpEdit
+### `DapBpReveal`
+
+Reveal popup info about current breakpoint's properties.
+
+### `DapBpLoad`
+
+Load breakpoints using persistent-breakpoints.nvim.
+
+### `DapBpSave`
+
+Save breakpoints using persistent-breakpoints.nvim.
+
+### `DapBpEdit`
 
 Edit log point message or breakpoint condition for current breakpoint.
 
-### :DapBpVirtEnable
+### `DapBpSetLogPoint`
+
+Set log point at current line using vim.ui.input.
+
+### `DapBpSetConditionalPoint`
+
+Set conditional breakpoint at current line using vim.ui.input.
+
+### `DapBpSetHitConditionPoint`
+
+Set hit condition breakpoint at current line using vim.ui.input.
+
+### `DapBpVirtEnable`
 
 Show virtual text information about breakpoints.
 
-### :DapBpVirtDisable
+### `DapBpVirtDisable`
 
 Clear virtual text information about breakpoints.
 
-### :DapBpVirtToggle
+### `DapBpVirtToggle`
 
 Toggle virtual text information about breakpoints.
+
+### `DapBpClearAll`
+
+Clear all breakpoints.
+
+## Keymaps
+
+```lua
+-- add bellow to your neovim configuration
+local dapbp_api = require("dap-breakpoints.api")
+local dapbp_keymaps = {
+    { key = "<leader>b", api = dapbp_api.toggle_breakpoint, desc = "Toggle Breakpoint" },
+    { key = "<leader>dtc", api = dapbp_api.set_conditional_breakpoint, desc = "Set Conditional Breakpoint" },
+    { key = "<leader>dth", api = dapbp_api.set_hit_condition_breakpoint, desc = "Set Hit Condition Breakpoint" },
+    { key = "<leader>dtl", api = dapbp_api.set_log_point, desc = "Set Log Point" },
+    { key = "<leader>dtL", api = dapbp_api.load_breakpoints, desc = "Load Breakpoints" },
+    { key = "<leader>dts", api = dapbp_api.save_breakpoints, desc = "Save Breakpoints" },
+    { key = "<leader>dte", api = dapbp_api.edit_property, desc = "Edit Breakpoint Property" },
+    { key = "<leader>dtv", api = dapbp_api.toggle_virtual_text, desc = "Toggle Breakpoint Virtual Text" },
+    { key = "<leader>dtC", api = dapbp_api.clear_all_breakpoints, desc = "Clear All Breakpoints" },
+    { key = "[b", api = dapbp_api.go_to_previous, desc = "Go to Previous Breakpoint" },
+    { key = "]b", api = dapbp_api.go_to_next, desc = "Go to Next Breakpoint" },
+    { key = "<M-b>", api = dapbp_api.popup_reveal, desc = "Reveal Breakpoint" },
+}
+for _, keymap in ipairs(dapbp_keymaps) do
+    vim.keymap.set("n", keymap.key, keymap.api, { desc = keymap.desc })
+end
+```
 
 ## Highlight Groups
 
@@ -79,6 +149,6 @@ Toggle virtual text information about breakpoints.
 - `DapHitConditionPointVirt`
 - `DapHitConditionPointVirtPrefix`
 
-## References
+## Reference
 
 - [dap-info](https://github.com/jonathan-elize/dap-info.nvim)
