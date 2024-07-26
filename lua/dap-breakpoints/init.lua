@@ -3,65 +3,30 @@ local M = {}
 local api = require("dap-breakpoints.api")
 local config = require("dap-breakpoints.config")
 
-local setup_commands = function()
-  vim.api.nvim_create_user_command("DapBpNext", function()
-    api.go_to_next()
-  end, {})
+local function setup_commands()
+  local commands = {
+    { name = "DapBpNext", api = api.go_to_next },
+    { name = "DapBpPrev", api = api.go_to_previous },
+    { name = "DapBpReveal", api = api.popup_reveal },
+    { name = "DapBpLoad", api = api.load_breakpoints },
+    { name = "DapBpSave", api = api.save_breakpoints },
+    { name = "DapBpEdit", api = api.edit_property },
+    { name = "DapBpToggle", api = api.toggle_breakpoint },
+    { name = "DapBpSetConditionalPoint", api = api.set_conditional_breakpoint },
+    { name = "DapBpSetHitConditionPoint", api = api.set_hit_condition_breakpoint },
+    { name = "DapBpSetLogPoint", api = api.set_log_point },
+    { name = "DapBpClearAll", api = api.clear_all_breakpoints },
+    { name = "DapBpVirtEnable", api = api.enable_virtual_text },
+    { name = "DapBpVirtDisable", api = api.disable_virtual_text },
+    { name = "DapBpVirtToggle", api = api.toggle_virtual_text },
+  }
 
-  vim.api.nvim_create_user_command("DapBpPrev", function()
-    api.go_to_previous()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpReveal", function()
-    api.popup_reveal()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpLoad", function()
-    api.load_breakpoints()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpSave", function()
-    api.save_breakpoints()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpEdit", function()
-    api.edit_property()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpToggle", function()
-    api.toggle_breakpoint()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpSetConditionalPoint", function()
-    api.set_conditional_breakpoint()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpSetHitConditionPoint", function()
-    api.set_hit_condition_breakpoint()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpSetLogPoint", function()
-    api.set_log_point()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpClearAll", function()
-    api.clear_all_breakpoints()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpVirtEnable", function()
-    api.enable_virtual_text()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpVirtDisable", function()
-    api.disable_virtual_text()
-  end, {})
-
-  vim.api.nvim_create_user_command("DapBpVirtToggle", function()
-    api.toggle_virtual_text()
-  end, {})
+  for _, command in ipairs(commands) do
+    vim.api.nvim_create_user_command(command.name, command.api, {})
+  end
 end
 
-local setup_highlight_groups = function()
+local function setup_highlight_groups()
   local highlights = {
     { group = 'DapBreakpointVirt', default = 'NonText' },
     { group = 'DapLogPointVirt', default = 'DapBreakpointVirt' },
@@ -78,7 +43,7 @@ local setup_highlight_groups = function()
   end
 end
 
-local setup_autocmds = function()
+local function setup_autocmds()
   local group = vim.api.nvim_create_augroup("dap-breakpoints", { clear = true })
 
   if config.breakpoint.auto_load then
@@ -90,7 +55,7 @@ local setup_autocmds = function()
   end
 end
 
-M.setup = function(opt)
+function M.setup(opt)
   for key, val in pairs(vim.tbl_extend("force", config, opt or {})) do
     config[key] = val
   end
