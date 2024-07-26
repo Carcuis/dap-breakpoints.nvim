@@ -206,17 +206,17 @@ function M.set_conditional_breakpoint()
 end
 
 function M.set_hit_condition_breakpoint()
+  local filetype = vim.bo.filetype
   vim.ui.input({ prompt = "Hit condition count: " }, function(input)
     M.set_breakpoint({ hit_condition = input })
   end)
-  util.set_input_ui_filetype("lua")
+  util.set_input_ui_filetype(filetype)
 end
 
 function M.set_log_point()
   vim.ui.input({ prompt = "Log point message: " }, function(input)
     M.set_breakpoint({ log_message = input })
   end)
-  util.set_input_ui_filetype("text")
 end
 
 function M.clear_all_breakpoints()
