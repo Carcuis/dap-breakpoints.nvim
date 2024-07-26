@@ -78,6 +78,18 @@ local setup_highlight_groups = function()
   end
 end
 
+local setup_autocmds = function()
+  local group = vim.api.nvim_create_augroup("dap-breakpoints", { clear = true })
+
+  if config.breakpoint.auto_load then
+    vim.api.nvim_create_autocmd({ "BufReadPost" }, { group = group, callback = api.load_breakpoints })
+  end
+
+  if config.breakpoint.auto_save then
+    vim.api.nvim_create_autocmd({ "BufWritePost" }, { group = group, callback = api.save_breakpoints })
+  end
+end
+
 M.setup = function(opt)
   for key, val in pairs(vim.tbl_extend("force", config, opt or {})) do
     config[key] = val
@@ -85,16 +97,7 @@ M.setup = function(opt)
 
   setup_commands()
   setup_highlight_groups()
-
-  if config.breakpoint.auto_load then
-    local group = vim.api.nvim_create_augroup("dap-breakpoints", { clear = true })
-    vim.api.nvim_create_autocmd({ "BufReadPost" }, {
-      group = group,
-      callback = function()
-        api.load_breakpoints()
-      end
-    })
-  end
+  setup_autocmds()
 end
 
 return M
