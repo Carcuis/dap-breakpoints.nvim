@@ -3,7 +3,7 @@ local M = {}
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
 
-M.enabled = config.virtual_text.enabled
+M.enabled = false
 
 local namespace = "dap-breakpoints"
 local ns_id = vim.api.nvim_create_namespace(namespace)
@@ -122,6 +122,22 @@ function M.enable_virtual_text_in_buffer(bufnr)
       bufnr = bufnr,
       line = _breakpoint.line
     })
+  end
+end
+
+function M.fix_detached_virtual_text_in_buffer(_bufnr)
+  if not M.enabled then
+    return
+  end
+
+  local bufnr = _bufnr or vim.fn.bufnr()
+  local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, ns_id, 0, -1, { details = true })
+
+  for _, extmark in ipairs(extmarks) do
+    local mark_line = extmark[2]
+    if breakpoint.get_breakpoint({ bufnr = bufnr, line = mark_line + 1 }) == nil then
+      vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark_line, mark_line + 1)
+    end
   end
 end
 

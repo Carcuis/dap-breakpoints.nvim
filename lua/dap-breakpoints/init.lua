@@ -51,7 +51,13 @@ local function setup_autocmds()
   end
 
   if config.breakpoint.auto_save then
-    vim.api.nvim_create_autocmd({ "BufWritePost" }, { group = group, callback = api.save_breakpoints })
+    vim.api.nvim_create_autocmd({ "BufWritePost", "BufWinLeave" }, { group = group, callback = api.save_breakpoints })
+  end
+end
+
+local function setup_virtual_text()
+  if config.virtual_text.enabled then
+    api.enable_virtual_text()
   end
 end
 
@@ -63,6 +69,7 @@ function M.setup(opt)
   setup_commands()
   setup_highlight_groups()
   setup_autocmds()
+  setup_virtual_text()
 end
 
 return M
