@@ -200,7 +200,6 @@ function M.set_breakpoint(opt)
   breakpoint.set_breakpoint(opt)
 
   if virtual_text.enabled then
-    virtual_text.clear_virtual_text_on_line()
     virtual_text.enable_virtual_text_on_line()
   end
 end

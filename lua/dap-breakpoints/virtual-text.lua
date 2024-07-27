@@ -89,20 +89,24 @@ end
 function M.enable_virtual_text_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
-  local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint(opt))
 
-  if vim.fn.bufloaded(bufnr) ~= 0 then
-    vim.api.nvim_buf_set_extmark(
-      bufnr,
-      ns_id,
-      line - 1,
-      0,
-      {
-        hl_mode = "combine",
-        virt_text = virt_text,
-      }
-    )
+  if vim.fn.bufloaded(bufnr) == 0 then
+    return
   end
+
+  M.clear_virtual_text_on_line({ bufnr = bufnr, line = line })
+
+  local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint(opt))
+  vim.api.nvim_buf_set_extmark(
+    bufnr,
+    ns_id,
+    line - 1,
+    0,
+    {
+      hl_mode = "combine",
+      virt_text = virt_text,
+    }
+  )
 end
 
 function M.enable_virtual_text_in_buffer(bufnr)
