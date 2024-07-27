@@ -28,18 +28,7 @@ function M.clear_virtual_text_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
 
-  local extmarks = vim.api.nvim_buf_get_extmarks(
-    bufnr,
-    ns_id,
-    { line - 1, 0 },
-    { line - 1, -1 },
-    { details = true }
-  )
-
-  for _, extmark in ipairs(extmarks) do
-    local mark_line = extmark[2]
-    vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark_line, mark_line + 1)
-  end
+  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, line - 1, line)
 end
 
 function M.clear_virtual_text_in_buffer(_bufnr)
@@ -136,7 +125,7 @@ function M.fix_detached_virtual_text_in_buffer(_bufnr)
   for _, extmark in ipairs(extmarks) do
     local mark_line = extmark[2]
     if breakpoint.get_breakpoint({ bufnr = bufnr, line = mark_line + 1 }) == nil then
-      vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark_line, mark_line + 1)
+      M.clear_virtual_text_on_line({ bufnr = bufnr, line = mark_line + 1 })
     end
   end
 end
