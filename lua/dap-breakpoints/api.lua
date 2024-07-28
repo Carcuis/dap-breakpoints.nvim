@@ -58,7 +58,7 @@ function M.go_to_next(opt)
 
   vim.fn.cursor({ next.line, _column })
 
-  if config.reveal.auto_popup and not breakpoint.is_normal_breakpoint(next) then
+  if config.breakpoint.auto_reveal_popup and not breakpoint.is_normal_breakpoint(next) then
     vim.schedule(function()
       M.popup_reveal()
     end)
