@@ -62,7 +62,7 @@ local function setup_virtual_text()
 end
 
 function M.setup(opt)
-  for key, val in pairs(vim.tbl_extend("force", config, opt or {})) do
+  for key, val in pairs(vim.tbl_deep_extend("force", config, opt or {})) do
     config[key] = val
   end
 
