@@ -1,9 +1,9 @@
-local M = {}
+local M = {
+  enabled = false
+}
 
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
-
-M.enabled = false
 
 local namespace = "dap-breakpoints"
 local ns_id = vim.api.nvim_create_namespace(namespace)
@@ -96,7 +96,7 @@ function M.enable_virtual_text_on_line(opt)
 
   M.clear_virtual_text_on_line({ bufnr = bufnr, line = line })
 
-  local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint(opt))
+  local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint({ bufnr = bufnr, line = line }))
   vim.api.nvim_buf_set_extmark(
     bufnr,
     ns_id,
