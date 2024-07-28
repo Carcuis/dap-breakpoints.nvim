@@ -105,6 +105,8 @@ function M.enable_virtual_text_on_line(opt)
     {
       hl_mode = "combine",
       virt_text = virt_text,
+      undo_restore = false,
+      invalidate = true,
     }
   )
 end
@@ -115,22 +117,6 @@ function M.enable_virtual_text_in_buffer(bufnr)
       bufnr = bufnr,
       line = _breakpoint.line
     })
-  end
-end
-
-function M.fix_detached_virtual_text_in_buffer(_bufnr)
-  if not M.enabled then
-    return
-  end
-
-  local bufnr = _bufnr or vim.fn.bufnr()
-  local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, ns_id, 0, -1, { details = true })
-
-  for _, extmark in ipairs(extmarks) do
-    local mark_line = extmark[2]
-    if breakpoint.get_breakpoint({ bufnr = bufnr, line = mark_line + 1 }) == nil then
-      M.clear_virtual_text_on_line({ bufnr = bufnr, line = mark_line + 1 })
-    end
   end
 end
 

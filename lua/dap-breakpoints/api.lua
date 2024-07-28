@@ -133,7 +133,6 @@ end
 
 function M.disable_virtual_text()
   virtual_text.clear_all_virtual_text()
-  vim.api.nvim_del_augroup_by_name("dap-breakpoints-virt-text")
   virtual_text.enabled = false
 end
 
@@ -147,26 +146,6 @@ function M.enable_virtual_text()
   end
 
   virtual_text.enabled = true
-
-  local group = vim.api.nvim_create_augroup("dap-breakpoints-virt-text", { clear = true })
-
-  vim.api.nvim_create_autocmd({ "BufReadPost" }, {
-    group = group,
-    callback = function()
-      vim.b.dap_breakpoints_buffer_line_count = vim.api.nvim_buf_line_count(0)
-    end,
-  })
-
-  vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
-    group = group,
-    callback = vim.schedule_wrap(function()
-      local lines = vim.api.nvim_buf_line_count(0)
-      if vim.b.dap_breakpoints_buffer_line_count and lines < vim.b.dap_breakpoints_buffer_line_count then
-        virtual_text.fix_detached_virtual_text_in_buffer()
-      end
-      vim.b.dap_breakpoints_buffer_line_count = lines
-    end),
-  })
 end
 
 function M.toggle_virtual_text()
