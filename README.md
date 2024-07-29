@@ -53,59 +53,59 @@ require('dap-breakpoints').setup{
 
 ## Commands
 
-### `DapBpToggle`
+`:DapBpToggle`
 
 Toggle breakpoint at current line.
 
-### `DapBpNext`
+`:DapBpNext`
 
 Go to the next breakpoint in buffer.
 
-### `DapBpPrev`
+`:DapBpPrev`
 
 Go to the previous breakpoint in buffer.
 
-### `DapBpReveal`
+`:DapBpReveal`
 
 Reveal popup info about current breakpoint's properties.
 
-### `DapBpLoad`
+`:DapBpLoad`
 
 Load breakpoints using persistent-breakpoints.nvim.
 
-### `DapBpSave`
+`:DapBpSave`
 
 Save breakpoints using persistent-breakpoints.nvim.
 
-### `DapBpEdit`
+`:DapBpEdit`
 
 Edit log point message or breakpoint condition for current breakpoint.
 
-### `DapBpSetLogPoint`
+`:DapBpSetLogPoint`
 
 Set log point at current line using vim.ui.input.
 
-### `DapBpSetConditionalPoint`
+`:DapBpSetConditionalPoint`
 
 Set conditional breakpoint at current line using vim.ui.input.
 
-### `DapBpSetHitConditionPoint`
+`:DapBpSetHitConditionPoint`
 
 Set hit condition breakpoint at current line using vim.ui.input.
 
-### `DapBpVirtEnable`
+`:DapBpVirtEnable`
 
 Show virtual text information about breakpoints.
 
-### `DapBpVirtDisable`
+`:DapBpVirtDisable`
 
 Clear virtual text information about breakpoints.
 
-### `DapBpVirtToggle`
+`:DapBpVirtToggle`
 
 Toggle virtual text information about breakpoints.
 
-### `DapBpClearAll`
+`:DapBpClearAll`
 
 Clear all breakpoints.
 
