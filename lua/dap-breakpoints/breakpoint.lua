@@ -6,10 +6,18 @@ local persistent_breakpoints = require("persistent-breakpoints.api")
 
 local config = require("dap-breakpoints.config")
 
+---@alias Breakpoint { line: integer, condition: string|nil, hitCondition: string|nil, logMessage: string|nil, state: table|nil }
+---@alias BreakpointProperty { condition: string|nil, hit_condition: string|nil, log_message: string|nil }
+---@alias Bufnr integer
+---@alias BufAndLine { bufnr: Bufnr, line: integer }
+
+---@return table<Bufnr, Breakpoint[]>
 function M.get_all_breakpoints()
   return nvim_dap_breakpoints.get()
 end
 
+---@param _bufnr Bufnr|nil
+---@return Breakpoint[]
 function M.get_buffer_breakpoints(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 
@@ -21,6 +29,8 @@ function M.get_buffer_breakpoints(_bufnr)
   return buffer_breakpoints
 end
 
+---@param opt BufAndLine|nil
+---@return Breakpoint|nil
 function M.get_breakpoint(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
@@ -39,6 +49,7 @@ function M.get_breakpoint(opt)
   return nil
 end
 
+---@return integer
 function M.get_total_breakpoints_count()
   local breakpoints = M.get_all_breakpoints()
   local total = 0
@@ -50,18 +61,26 @@ function M.get_total_breakpoints_count()
   return total
 end
 
+---@param target Breakpoint
+---@return boolean
 function M.is_log_point(target)
   return target.logMessage ~= nil
 end
 
+---@param target Breakpoint
+---@return boolean
 function M.is_conditional_breakpoint(target)
   return target.condition ~= nil
 end
 
+---@param target Breakpoint
+---@return boolean
 function M.is_hit_condition_breakpoint(target)
   return target.hitCondition ~= nil
 end
 
+---@param target Breakpoint
+---@return boolean
 function M.is_normal_breakpoint(target)
   return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
 end
@@ -80,6 +99,7 @@ function M.auto_save()
   end
 end
 
+---@param opt BreakpointProperty|nil
 function M.set_breakpoint(opt)
   if opt then
     nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)

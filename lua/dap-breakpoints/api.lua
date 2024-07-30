@@ -9,6 +9,7 @@ function M.go_to_previous()
   M.go_to_next({ reverse = true })
 end
 
+---@param opt { reverse: boolean }|nil
 function M.go_to_next(opt)
   local buffer_breakpoints = breakpoint.get_buffer_breakpoints()
   if #buffer_breakpoints == 0 then
@@ -183,6 +184,7 @@ function M.save_breakpoints()
   breakpoint.save_breakpoints()
 end
 
+---@param opt BreakpointProperty|nil
 function M.set_breakpoint(opt)
   if opt then
     for _, prop in ipairs({ "condition", "hit_condition", "log_message" }) do

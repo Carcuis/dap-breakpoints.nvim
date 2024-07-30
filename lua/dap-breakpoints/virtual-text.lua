@@ -8,10 +8,14 @@ local config = require("dap-breakpoints.config")
 local namespace = "dap-breakpoints"
 local ns_id = vim.api.nvim_create_namespace(namespace)
 
+---@alias LayoutType "eol"|"right_align"|"overlay"
+
 function M.get_ns_id()
   return ns_id
 end
 
+---@param target Breakpoint
+---@return string
 function M.get_virtual_text_hl_group(target)
   if breakpoint.is_log_point(target) then
     return "DapLogPointVirt"
@@ -24,6 +28,7 @@ function M.get_virtual_text_hl_group(target)
   end
 end
 
+---@param opt BufAndLine|nil
 function M.clear_virtual_text_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
@@ -42,8 +47,6 @@ function M.clear_all_virtual_text()
   end
 end
 
----@alias LayoutType "eol"|"right_align"|"overlay"
-
 ---@return { layout_type: LayoutType, layout_col: integer }
 function M.get_user_layout()
   local user_layout = config.virtual_text.layout.position
@@ -61,6 +64,9 @@ function M.get_user_layout()
   return { layout_type = layout_type, layout_col = layout_col }
 end
 
+---Generate virtual text. A list of `[text, highlight]` tuples, each representing a text chunk
+---@param target Breakpoint
+---@return table<integer, [string, string]>
 function M.generate_virtual_text_by_breakpoint(target)
   local normal = breakpoint.is_normal_breakpoint(target)
   local log_point = breakpoint.is_log_point(target)
@@ -119,6 +125,7 @@ function M.generate_virtual_text_by_breakpoint(target)
   return virt_text
 end
 
+---@param opt BufAndLine|nil
 function M.enable_virtual_text_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
@@ -186,6 +193,7 @@ function M.enable_virtual_text_on_line(opt)
   )
 end
 
+---@param _bufnr Bufnr|nil
 function M.enable_virtual_text_in_buffer(_bufnr)
   local bufnr = _bufnr or vim.fn.bufnr()
 

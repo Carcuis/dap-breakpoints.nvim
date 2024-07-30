@@ -6,10 +6,13 @@ local message_highlight_map = {
   [vim.log.levels.ERROR] = "ErrorMsg",
 }
 
+---@param message string
+---@param level integer
 function M.echo_message(message, level)
   vim.api.nvim_echo({{ message, message_highlight_map[level] or "MsgArea" }}, false, {})
 end
 
+---@param opts { message: string, title: string, syntax: string }
 function M.show_popup(opts)
   local width = 9
   if string.len(opts.message) > width then
@@ -28,6 +31,7 @@ function M.show_popup(opts)
   vim.bo[bufnr].filetype = opts.syntax
 end
 
+---@param filetype string
 function M.set_input_ui_filetype(filetype)
   vim.schedule(function()
     for _, win_id in ipairs(vim.api.nvim_list_wins()) do
