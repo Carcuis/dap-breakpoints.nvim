@@ -1,4 +1,4 @@
-*dap-breakpoints.txt*          For NVIM 0.10         Last change: 2024 July 30
+*dap-breakpoints.txt*          For NVIM 0.10         Last change: 2024 July 31
 
 ==============================================================================
 CONTENTS                                                     *dap-breakpoints*
@@ -16,7 +16,7 @@ CONTENTS                                                     *dap-breakpoints*
 INTRODUCTION                                    *dap-breakpoints-introduction*
 
 `dap-breakpoints.nvim` is a Lua plugin for Neovim that helps manage
-breakpoints, create advanced breakpoints using `vim.ui.input`, and display
+breakpoints, create advanced breakpoints using vim.ui.input, and display
 breakpoint properties as virtual text with nvim-dap
 <https://github.com/mfussenegger/nvim-dap>.
 

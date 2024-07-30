@@ -1,8 +1,14 @@
 # dap-breakpoints.nvim
 
 `dap-breakpoints.nvim` is a Lua plugin for Neovim that helps manage breakpoints,
-create advanced breakpoints using `vim.ui.input`, and display breakpoint
+create advanced breakpoints using vim.ui.input, and display breakpoint
 properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap).
+
+<!-- panvimdoc-ignore-start -->
+
+![image](https://github.com/user-attachments/assets/be734cc3-10f3-4efb-89ed-5c7147640914)
+
+<!-- panvimdoc-ignore-end -->
 
 - [Requirements](#requirements)
 - [Setup](#setup)
