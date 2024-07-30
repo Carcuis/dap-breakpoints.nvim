@@ -220,7 +220,15 @@ function M.set_log_point()
 end
 
 function M.clear_all_breakpoints()
-  vim.ui.input({ prompt = 'Clear all breakpoints? [y/N] ' }, function(input)
+  local and_save = config.breakpoint.auto_save and " and save" or ""
+  local total_count = breakpoint.get_total_breakpoints_count()
+
+  if total_count == 0 then
+    util.echo_message("No breakpoints to clear.", vim.log.levels.WARN)
+    return
+  end
+
+  vim.ui.input({ prompt = "Clear all ("..total_count..") breakpoints"..and_save.."? [y/N] " }, function(input)
     if input and string.match(string.lower(input), '^ye?s?$') then
       if virtual_text.enabled then
         virtual_text.clear_all_virtual_text()
