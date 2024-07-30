@@ -77,10 +77,12 @@ function M.generate_virtual_text_by_breakpoint(target)
     return {}
   end
 
+  local hl_group = M.get_virtual_text_hl_group(target)
+
   local virt_text = {
     { string.rep(" ", spacing) },
-    { prefix, M.get_virtual_text_hl_group(target) .. "Prefix" },
-    { string.format("%s", message:gsub("\r", ""):gsub("\n", "  ")), M.get_virtual_text_hl_group(target) }
+    { prefix, hl_group .. "Prefix" },
+    { string.format(message), hl_group }
   }
 
   return virt_text
