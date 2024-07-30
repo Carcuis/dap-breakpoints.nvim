@@ -211,10 +211,6 @@ end
 --- This can fix the issue of virtual text covering code when the code length exceeds
 --- the user-defined column position, especially for inlay hints updates.
 function M.set_decoration_provider()
-  if M.get_user_layout().layout_type == "eol" then
-    return
-  end
-
   vim.api.nvim_set_decoration_provider(ns_id, {
     on_start = function(_, tick)
       if tick % 10 ~= 0 then
@@ -226,11 +222,23 @@ function M.set_decoration_provider()
 end
 
 function M.unset_decoration_provider()
-  if M.get_user_layout().layout_type == "eol" then
-    return
-  end
-
   vim.api.nvim_set_decoration_provider(ns_id, {})
+end
+
+function M.set_current_line_only_autocmd()
+  local group = vim.api.nvim_create_augroup("dap-breakpoints-virt-text", { clear = true })
+
+  vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    group = group,
+    callback = function()
+      M.clear_all_virtual_text()
+      M.enable_virtual_text_on_line()
+    end
+  })
+end
+
+function M.unset_current_line_only_autocmd()
+  vim.api.nvim_del_augroup_by_name("dap-breakpoints-virt-text")
 end
 
 return M

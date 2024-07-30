@@ -133,7 +133,11 @@ end
 
 function M.disable_virtual_text()
   virtual_text.clear_all_virtual_text()
-  virtual_text.unset_decoration_provider()
+  if config.virtual_text.current_line_only then
+    virtual_text.unset_current_line_only_autocmd()
+  elseif virtual_text.get_user_layout().layout_type ~= "eol" then
+      virtual_text.unset_decoration_provider()
+  end
   virtual_text.enabled = false
 end
 
@@ -142,11 +146,17 @@ function M.enable_virtual_text()
     virtual_text.clear_all_virtual_text()
   end
 
-  for bufnr, _ in pairs(breakpoint.get_all_breakpoints()) do
-    virtual_text.enable_virtual_text_in_buffer(bufnr)
+  if config.virtual_text.current_line_only then
+    virtual_text.enable_virtual_text_on_line()
+    virtual_text.set_current_line_only_autocmd()
+  else
+    virtual_text.enable_virtual_text_in_all_buffers()
+
+    if virtual_text.get_user_layout().layout_type ~= "eol" then
+      virtual_text.set_decoration_provider()
+    end
   end
 
-  virtual_text.set_decoration_provider()
   virtual_text.enabled = true
 end
 
@@ -161,7 +171,11 @@ end
 function M.load_breakpoints()
   breakpoint.load_breakpoints()
   if virtual_text.enabled then
-    virtual_text.enable_virtual_text_in_all_buffers()
+    if config.virtual_text.current_line_only then
+      virtual_text.enable_virtual_text_on_line()
+    else
+      virtual_text.enable_virtual_text_in_all_buffers()
+    end
   end
 end
 
