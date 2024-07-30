@@ -1,8 +1,8 @@
 # dap-breakpoints.nvim
 
-`dap-breakpoints.nvim` is a lua plugin for Neovim to help manage breakpoints,
+`dap-breakpoints.nvim` is a Lua plugin for Neovim that helps manage breakpoints,
 create advanced breakpoints using `vim.ui.input`, and display breakpoint
-properties virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap).
+properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap).
 
 - [Requirements](#requirements)
 - [Setup](#setup)
@@ -77,11 +77,13 @@ Reveal popup info about current breakpoint's properties.
 
 `:DapBpLoad`
 
-Load breakpoints using persistent-breakpoints.nvim.
+Load saved breakpoints in current opened buffers by using persistent-breakpoints.nvim.
+Set `breakpoint.auto_load` to `true` to load breakpoints automatically on `BufReadPost`.
 
 `:DapBpSave`
 
-Save breakpoints using persistent-breakpoints.nvim.
+Save all breakpoints in buffers using persistent-breakpoints.nvim.
+Set `breakpoint.auto_save` to `true` to save breakpoints automatically on changes.
 
 `:DapBpEdit`
 
@@ -99,6 +101,10 @@ Set conditional breakpoint at current line using vim.ui.input.
 
 Set hit condition breakpoint at current line using vim.ui.input.
 
+`:DapBpClearAll`
+
+Clear all breakpoints in buffers.
+
 `:DapBpVirtEnable`
 
 Show virtual text information about breakpoints.
@@ -110,10 +116,6 @@ Clear virtual text information about breakpoints.
 `:DapBpVirtToggle`
 
 Toggle virtual text information about breakpoints.
-
-`:DapBpClearAll`
-
-Clear all breakpoints.
 
 ## Keymaps
 
