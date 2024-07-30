@@ -38,6 +38,7 @@ require('dap-breakpoints').setup{
   },
   virtual_text = {
     enable = true,
+    priority = 10,
     current_line_only = false,
     aligned = false,
     spacing = 4,

@@ -110,6 +110,7 @@ function M.enable_virtual_text_on_line(opt)
     {
       hl_mode = "combine",
       virt_text = virt_text,
+      priority = config.virtual_text.priority,
       undo_restore = false,
       invalidate = true,
     }

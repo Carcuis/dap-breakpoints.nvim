@@ -8,6 +8,7 @@ config = {
   },
   virtual_text = {
     enabled = true,
+    priority = 10,
     current_line_only = false,
     aligned = false,
     spacing = 4,
