@@ -94,6 +94,11 @@ function M.enable_virtual_text_on_line(opt)
     return
   end
 
+  local target = breakpoint.get_breakpoint({ bufnr = bufnr, line = line })
+  if target == nil then
+    return
+  end
+
   M.clear_virtual_text_on_line({ bufnr = bufnr, line = line })
 
   local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint({ bufnr = bufnr, line = line }))
