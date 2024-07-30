@@ -133,6 +133,7 @@ end
 
 function M.disable_virtual_text()
   virtual_text.clear_all_virtual_text()
+  virtual_text.unset_decoration_provider()
   virtual_text.enabled = false
 end
 
@@ -145,6 +146,7 @@ function M.enable_virtual_text()
     virtual_text.enable_virtual_text_in_buffer(bufnr)
   end
 
+  virtual_text.set_decoration_provider()
   virtual_text.enabled = true
 end
 

@@ -42,6 +42,25 @@ function M.clear_all_virtual_text()
   end
 end
 
+---@alias LayoutType "eol"|"right_align"|"overlay"
+
+---@return { layout_type: LayoutType, layout_col: integer }
+function M.get_user_layout()
+  local user_layout = config.virtual_text.layout.position
+  local layout_type = "eol"
+  local layout_col = 0
+
+  if user_layout == "right_align" then
+    layout_type = "right_align"
+  elseif type(user_layout) == "number" and user_layout == math.floor(user_layout) then
+    if user_layout > 0 then
+      layout_type = "overlay"
+      layout_col = user_layout
+    end
+  end
+  return { layout_type = layout_type, layout_col = layout_col }
+end
+
 function M.generate_virtual_text_by_breakpoint(target)
   local normal = breakpoint.is_normal_breakpoint(target)
   local log_point = breakpoint.is_log_point(target)
@@ -62,7 +81,15 @@ function M.generate_virtual_text_by_breakpoint(target)
     [hit_condition] = target.hitCondition
   }
 
-  local spacing = config.virtual_text.spacing
+  local layout_type = M.get_user_layout().layout_type
+  local spaces = 0
+
+  if layout_type == "eol" then
+    spaces = math.max(config.virtual_text.layout.spaces - 1, 0)
+  else
+    spaces = 0
+  end
+
   local prefix = ""
   local message = ""
 
@@ -77,10 +104,14 @@ function M.generate_virtual_text_by_breakpoint(target)
     return {}
   end
 
+  if layout_type == "right_align" then
+    message = message .. " "
+  end
+
   local hl_group = M.get_virtual_text_hl_group(target)
 
   local virt_text = {
-    { string.rep(" ", spacing) },
+    { string.rep(" ", spaces) },
     { prefix, hl_group .. "Prefix" },
     { string.format(message), hl_group }
   }
@@ -103,7 +134,40 @@ function M.enable_virtual_text_on_line(opt)
 
   M.clear_virtual_text_on_line({ bufnr = bufnr, line = line })
 
-  local virt_text = M.generate_virtual_text_by_breakpoint(breakpoint.get_breakpoint({ bufnr = bufnr, line = line }))
+  local virt_text = M.generate_virtual_text_by_breakpoint(target)
+
+  local user_layout = M.get_user_layout()
+  ---@type LayoutType
+  local virt_text_pos = user_layout.layout_type
+  ---@type integer|nil
+  local virt_text_win_col = nil
+
+  local line_len = vim.fn.virtcol({ line, '$' }) - 1
+  local leftcol = vim.fn.winsaveview().leftcol
+
+  if virt_text_pos == "right_align" then
+    local virt_text_str = {}
+    for _, data in ipairs(virt_text) do
+      virt_text_str[#virt_text_str + 1] = data[1]
+    end
+    local virt_text_length = vim.api.nvim_strwidth(table.concat(virt_text_str))
+
+    local winid = vim.api.nvim_get_current_win()
+    local wininfo = vim.fn.getwininfo(winid)[1]
+    local textoff = wininfo and wininfo.textoff or 0
+    local win_width = vim.api.nvim_win_get_width(0) - textoff
+
+    if virt_text_length > (win_width - line_len + leftcol) then
+      virt_text_pos = "eol"
+    end
+  elseif virt_text_pos == "overlay" then
+    if user_layout.layout_col <= line_len then
+      virt_text_pos = "eol"
+    else
+      virt_text_win_col = math.max(user_layout.layout_col - leftcol - 1, 0)
+    end
+  end
+
   vim.api.nvim_buf_set_extmark(
     bufnr,
     ns_id,
@@ -112,6 +176,9 @@ function M.enable_virtual_text_on_line(opt)
     {
       hl_mode = "combine",
       virt_text = virt_text,
+      virt_text_hide = true,
+      virt_text_pos = virt_text_pos,
+      virt_text_win_col = virt_text_win_col,
       priority = config.virtual_text.priority,
       undo_restore = false,
       invalidate = true,
@@ -126,6 +193,33 @@ function M.enable_virtual_text_in_buffer(bufnr)
       line = _breakpoint.line
     })
   end
+end
+
+--- Set decoration provider for virtual text if user layout type is "overlay" or "right_align".
+---
+--- This can fix the issue of virtual text covering code when the code length exceeds
+--- the user-defined column position, especially for inlay hints updates.
+function M.set_decoration_provider()
+  if M.get_user_layout().layout_type == "eol" then
+    return
+  end
+
+  vim.api.nvim_set_decoration_provider(ns_id, {
+    on_start = function(_, tick)
+      if tick % 10 ~= 0 then
+        return
+      end
+      M.enable_virtual_text_in_buffer()
+    end
+  })
+end
+
+function M.unset_decoration_provider()
+  if M.get_user_layout().layout_type == "eol" then
+    return
+  end
+
+  vim.api.nvim_set_decoration_provider(ns_id, {})
 end
 
 return M
