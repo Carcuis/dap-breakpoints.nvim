@@ -29,6 +29,7 @@ require("dap-breakpoints").setup()
 ## Configuation
 
 ```lua
+-- default config
 require('dap-breakpoints').setup{
   breakpoint = {
     auto_load = true,         -- auto load breakpoints on 'BufReadPost'
@@ -112,7 +113,7 @@ Clear all breakpoints.
 ## Keymaps
 
 ```lua
--- add bellow to your neovim configuration
+-- add below to your neovim configuration
 local dapbp_api = require("dap-breakpoints.api")
 local dapbp_keymaps = {
     { key = "<leader>b", api = dapbp_api.toggle_breakpoint, desc = "Toggle Breakpoint" },
