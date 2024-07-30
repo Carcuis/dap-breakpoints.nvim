@@ -186,7 +186,9 @@ function M.enable_virtual_text_on_line(opt)
   )
 end
 
-function M.enable_virtual_text_in_buffer(bufnr)
+function M.enable_virtual_text_in_buffer(_bufnr)
+  local bufnr = _bufnr or vim.fn.bufnr()
+
   for _, _breakpoint in ipairs( breakpoint.get_buffer_breakpoints(bufnr)) do
     M.enable_virtual_text_on_line({
       bufnr = bufnr,
