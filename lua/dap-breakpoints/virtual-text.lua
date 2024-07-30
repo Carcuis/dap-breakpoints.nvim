@@ -195,6 +195,17 @@ function M.enable_virtual_text_in_buffer(bufnr)
   end
 end
 
+function M.enable_virtual_text_in_all_buffers()
+  for bufnr, buffer_breakpoints in pairs(breakpoint.get_all_breakpoints()) do
+    for _, _breakpoint in ipairs(buffer_breakpoints) do
+      M.enable_virtual_text_on_line({
+        bufnr = bufnr,
+        line = _breakpoint.line
+      })
+    end
+  end
+end
+
 --- Set decoration provider for virtual text if user layout type is "overlay" or "right_align".
 ---
 --- This can fix the issue of virtual text covering code when the code length exceeds

@@ -161,7 +161,7 @@ end
 function M.load_breakpoints()
   breakpoint.load_breakpoints()
   if virtual_text.enabled then
-    virtual_text.enable_virtual_text_in_buffer()
+    virtual_text.enable_virtual_text_in_all_buffers()
   end
 end
 
