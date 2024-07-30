@@ -37,7 +37,7 @@ require('dap-breakpoints').setup{
     auto_reveal_popup = true, -- auto show pop up property when navigate to next/prev breakpoint
   },
   virtual_text = {
-    enable = true,
+    enabled = true,
     priority = 10,
     current_line_only = false,
     aligned = false,
