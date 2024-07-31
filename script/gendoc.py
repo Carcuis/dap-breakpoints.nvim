@@ -69,9 +69,9 @@ class GenerateVimdoc:
 
     @staticmethod
     def post_modify() -> None:
-        with open(UserPath.output_vimdoc, 'r') as file:
+        with open(UserPath.output_vimdoc, 'r', encoding='utf-8') as file:
             content = file.read()
-            content = re.sub(r"^\- \|.*\|\n{1,2}", "", content.replace(
+            content = re.sub(r"^  (\- \w+(?: \w+)?)", r"\1  ", content.replace(
                 "Table of Contents                          *dap-breakpoints-table-of-contents*",
                 "CONTENTS                                                     *dap-breakpoints*"
             ).replace(
@@ -81,7 +81,7 @@ class GenerateVimdoc:
                 "1. dap-breakpoints.nvim                 *dap-breakpoints-dap-breakpoints.nvim*",
                 "INTRODUCTION                                    *dap-breakpoints-introduction*"
             ), flags=re.MULTILINE)
-        with open(UserPath.output_vimdoc, 'w') as file:
+        with open(UserPath.output_vimdoc, 'w', encoding='utf-8') as file:
             file.write(content)
 
 

@@ -8,8 +8,6 @@ properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-
 
 ![image](https://github.com/user-attachments/assets/be734cc3-10f3-4efb-89ed-5c7147640914)
 
-<!-- panvimdoc-ignore-end -->
-
 - [Requirements](#requirements)
 - [Setup](#setup)
 - [Configuation](#configuation)
@@ -17,6 +15,8 @@ properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-
 - [Keymaps](#keymaps)
 - [Highlight Groups](#highlight-groups)
 - [Reference](#reference)
+
+<!-- panvimdoc-ignore-end -->
 
 ## Requirements
 
@@ -129,21 +129,21 @@ Toggle virtual text information about breakpoints.
 -- add below to your neovim configuration
 local dapbp_api = require("dap-breakpoints.api")
 local dapbp_keymaps = {
-    { key = "<leader>b", api = dapbp_api.toggle_breakpoint, desc = "Toggle Breakpoint" },
-    { key = "<leader>dtc", api = dapbp_api.set_conditional_breakpoint, desc = "Set Conditional Breakpoint" },
-    { key = "<leader>dth", api = dapbp_api.set_hit_condition_breakpoint, desc = "Set Hit Condition Breakpoint" },
-    { key = "<leader>dtl", api = dapbp_api.set_log_point, desc = "Set Log Point" },
-    { key = "<leader>dtL", api = dapbp_api.load_breakpoints, desc = "Load Breakpoints" },
-    { key = "<leader>dts", api = dapbp_api.save_breakpoints, desc = "Save Breakpoints" },
-    { key = "<leader>dte", api = dapbp_api.edit_property, desc = "Edit Breakpoint Property" },
-    { key = "<leader>dtv", api = dapbp_api.toggle_virtual_text, desc = "Toggle Breakpoint Virtual Text" },
-    { key = "<leader>dtC", api = dapbp_api.clear_all_breakpoints, desc = "Clear All Breakpoints" },
-    { key = "[b", api = dapbp_api.go_to_previous, desc = "Go to Previous Breakpoint" },
-    { key = "]b", api = dapbp_api.go_to_next, desc = "Go to Next Breakpoint" },
-    { key = "<M-b>", api = dapbp_api.popup_reveal, desc = "Reveal Breakpoint" },
+  { key = "<leader>b", api = dapbp_api.toggle_breakpoint, desc = "Toggle Breakpoint" },
+  { key = "<leader>dtc", api = dapbp_api.set_conditional_breakpoint, desc = "Set Conditional Breakpoint" },
+  { key = "<leader>dth", api = dapbp_api.set_hit_condition_breakpoint, desc = "Set Hit Condition Breakpoint" },
+  { key = "<leader>dtl", api = dapbp_api.set_log_point, desc = "Set Log Point" },
+  { key = "<leader>dtL", api = dapbp_api.load_breakpoints, desc = "Load Breakpoints" },
+  { key = "<leader>dts", api = dapbp_api.save_breakpoints, desc = "Save Breakpoints" },
+  { key = "<leader>dte", api = dapbp_api.edit_property, desc = "Edit Breakpoint Property" },
+  { key = "<leader>dtv", api = dapbp_api.toggle_virtual_text, desc = "Toggle Breakpoint Virtual Text" },
+  { key = "<leader>dtC", api = dapbp_api.clear_all_breakpoints, desc = "Clear All Breakpoints" },
+  { key = "[b", api = dapbp_api.go_to_previous, desc = "Go to Previous Breakpoint" },
+  { key = "]b", api = dapbp_api.go_to_next, desc = "Go to Next Breakpoint" },
+  { key = "<M-b>", api = dapbp_api.popup_reveal, desc = "Reveal Breakpoint" },
 }
 for _, keymap in ipairs(dapbp_keymaps) do
-    vim.keymap.set("n", keymap.key, keymap.api, { desc = keymap.desc })
+  vim.keymap.set("n", keymap.key, keymap.api, { desc = keymap.desc })
 end
 ```
 
