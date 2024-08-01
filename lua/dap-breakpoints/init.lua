@@ -51,7 +51,7 @@ local function setup_autocmds()
   end
 
   if config.breakpoint.auto_save then
-    vim.api.nvim_create_autocmd({ "BufWritePost", "BufWinLeave" }, { group = group, callback = api.save_breakpoints })
+    vim.api.nvim_create_autocmd({ "BufWritePost", "QuitPre" }, { group = group, callback = api.save_breakpoints })
   end
 end
 
