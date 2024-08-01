@@ -170,7 +170,8 @@ function M.toggle_virtual_text()
 end
 
 function M.load_breakpoints()
-  breakpoint.load_breakpoints()
+  breakpoint.load()
+
   if virtual_text.enabled then
     if config.virtual_text.current_line_only then
       virtual_text.enable_virtual_text_on_line()
@@ -181,7 +182,7 @@ function M.load_breakpoints()
 end
 
 function M.save_breakpoints()
-  breakpoint.save_breakpoints()
+  breakpoint.save()
 end
 
 ---@param opt BreakpointProperty|nil

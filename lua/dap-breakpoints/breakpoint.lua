@@ -85,17 +85,17 @@ function M.is_normal_breakpoint(target)
   return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
 end
 
-function M.load_breakpoints()
+function M.load()
   persistent_breakpoints.load_breakpoints()
 end
 
-function M.save_breakpoints()
+function M.save()
   persistent_breakpoints.breakpoints_changed_in_current_buffer()
 end
 
 function M.auto_save()
   if config.breakpoint.auto_save then
-    M.save_breakpoints()
+    M.save()
   end
 end
 
