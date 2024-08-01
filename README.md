@@ -47,7 +47,7 @@ require('dap-breakpoints').setup{
     priority = 10,
     current_line_only = false,
     layout = {
-      position = 121,         ---@type "eol"|"right_align"|integer
+      position = 121,         ---@type "eol" | "right_align" | integer
                               -- can be "eol", "right_align", or a fixed number (>= 1) for starting column
       spaces = 4,             -- spaces between code and virtual text, only for position = "eol"
                               -- their is at least one space between code and virtual text in neovim
@@ -58,7 +58,7 @@ require('dap-breakpoints').setup{
       conditional = "󰯲 ",
       hit_condition = "󰰁 ",
     },
-    custom_text_handler = nil, -- function(target)
+    custom_text_handler = nil, ---@type nil | fun(target: Breakpoint): string
   },
 }
 ```
