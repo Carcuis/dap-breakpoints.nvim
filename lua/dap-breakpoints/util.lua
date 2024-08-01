@@ -12,6 +12,13 @@ function M.echo_message(message, level)
   vim.api.nvim_echo({{ message, message_highlight_map[level] or "MsgArea" }}, false, {})
 end
 
+---@param message string
+---@param level integer|nil
+function M.notify(message, level)
+  level = level or vim.log.levels.INFO
+  vim.notify(message, level, { title = "dap-breakpoints" })
+end
+
 ---@param opts { message: string, title: string, syntax: string }
 function M.show_popup(opts)
   local width = 9

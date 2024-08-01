@@ -27,6 +27,7 @@ REQUIREMENTS                                    *dap-breakpoints-requirements*
 - nvim-dap <https://github.com/mfussenegger/nvim-dap>
 - persistent-breakpoints.nvim <https://github.com/Weissle/persistent-breakpoints.nvim>
 - dressing.nvim <https://github.com/stevearc/dressing.nvim> (optional)
+- nvim-notify <https://github.com/rcarriga/nvim-notify> (optional)
 
 
 SETUP                                                  *dap-breakpoints-setup*
@@ -141,8 +142,8 @@ KEYMAPS                                              *dap-breakpoints-keymaps*
       { key = "<leader>dtc", api = dapbp_api.set_conditional_breakpoint, desc = "Set Conditional Breakpoint" },
       { key = "<leader>dth", api = dapbp_api.set_hit_condition_breakpoint, desc = "Set Hit Condition Breakpoint" },
       { key = "<leader>dtl", api = dapbp_api.set_log_point, desc = "Set Log Point" },
-      { key = "<leader>dtL", api = dapbp_api.load_breakpoints, desc = "Load Breakpoints" },
-      { key = "<leader>dts", api = dapbp_api.save_breakpoints, desc = "Save Breakpoints" },
+      { key = "<leader>dtL", api = function() dapbp_api.load_breakpoints({ notify = true }) end, desc = "Load Breakpoints" },
+      { key = "<leader>dts", api = function() dapbp_api.save_breakpoints({ notify = true }) end, desc = "Save Breakpoints" },
       { key = "<leader>dte", api = dapbp_api.edit_property, desc = "Edit Breakpoint Property" },
       { key = "<leader>dtv", api = dapbp_api.toggle_virtual_text, desc = "Toggle Breakpoint Virtual Text" },
       { key = "<leader>dtC", api = dapbp_api.clear_all_breakpoints, desc = "Clear All Breakpoints" },

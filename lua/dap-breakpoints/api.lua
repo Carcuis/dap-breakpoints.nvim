@@ -169,7 +169,8 @@ function M.toggle_virtual_text()
   end
 end
 
-function M.load_breakpoints()
+---@param opt { notify: boolean }|nil
+function M.load_breakpoints(opt)
   breakpoint.load()
 
   if virtual_text.enabled then
@@ -179,10 +180,25 @@ function M.load_breakpoints()
       virtual_text.enable_virtual_text_in_all_buffers()
     end
   end
+
+  if opt and opt.notify then
+    local total_count = breakpoint.get_total_breakpoints_count()
+    local loaded_buf_count = vim.tbl_count(breakpoint.get_all_breakpoints())
+    local message = "Loaded "..total_count.." breakpoints in "..loaded_buf_count.." buffers."
+    util.notify(message)
+  end
 end
 
-function M.save_breakpoints()
+---@param opt { notify: boolean }|nil
+function M.save_breakpoints(opt)
   breakpoint.save()
+
+  if opt and opt.notify then
+    local total_count = breakpoint.get_total_breakpoints_count()
+    local saved_buf_count = vim.tbl_count(breakpoint.get_all_breakpoints())
+    local message = "Saved "..total_count.." breakpoints in "..saved_buf_count.." buffers."
+    util.notify(message)
+  end
 end
 
 ---@param opt BreakpointProperty|nil
