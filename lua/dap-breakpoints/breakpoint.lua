@@ -86,7 +86,7 @@ function M.is_normal_breakpoint(target)
 end
 
 function M.load()
-  persistent_breakpoints.load_breakpoints()
+  persistent_breakpoints.reload_breakpoints()
 end
 
 function M.save()
