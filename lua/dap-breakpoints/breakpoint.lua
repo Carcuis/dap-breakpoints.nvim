@@ -6,10 +6,23 @@ local persistent_breakpoints = require("persistent-breakpoints.api")
 
 local config = require("dap-breakpoints.config")
 
----@alias Breakpoint { line: integer, condition: string|nil, hitCondition: string|nil, logMessage: string|nil, state: table|nil }
----@alias BreakpointProperty { condition: string|nil, hit_condition: string|nil, log_message: string|nil }
+---@class Breakpoint
+---@field line integer
+---@field condition string|nil
+---@field hitCondition string|nil
+---@field logMessage string|nil
+---@field state table|nil
+
+---@class BreakpointProperty
+---@field condition string|nil
+---@field hit_condition string|nil
+---@field log_message string|nil
+
 ---@alias Bufnr integer
----@alias BufAndLine { bufnr: Bufnr, line: integer }
+
+---@class BufAndLine
+---@field bufnr Bufnr
+---@field line integer
 
 ---@return table<Bufnr, Breakpoint[]>
 function M.get_all_breakpoints()
