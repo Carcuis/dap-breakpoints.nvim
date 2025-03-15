@@ -1,25 +1,25 @@
 import os
 import re
-import yaml
 from pathlib import Path
 from shutil import which
 
 
 class UserPath:
-    project_path: Path = Path(__file__).parent.parent.relative_to(Path.cwd())
+    project_path: Path = Path(__file__).parents[1].relative_to(Path.cwd())
     path_yaml: Path = project_path / "script" / "path.yaml"
-    readme: Path = Path("")
-    output_vimdoc: Path = Path("")
+    readme: Path = project_path / "README.md"
+    output_vimdoc: Path = project_path / "doc" / "dap-breakpoints.txt"
     panvimdoc: Path = Path("")
 
     @classmethod
     def read_path_from_yaml(cls) -> None:
         try:
             with open(cls.path_yaml, 'r') as stream:
-                yaml_content = yaml.safe_load(stream)
-                cls.readme = cls.project_path / Path(yaml_content['readme'])
-                cls.output_vimdoc = cls.project_path / Path("doc") / yaml_content['output_vimdoc']
-                cls.panvimdoc = cls.project_path / Path(yaml_content['panvimdoc'])
+                content = stream.read()
+                panvimdoc_path = re.search(r'^panvimdoc:\s*(\S+)$', content)
+                assert panvimdoc_path is not None, "Error: panvimdoc path not found in path.yaml."
+                cls.panvimdoc = Path(os.path.expanduser(panvimdoc_path.group(1)))
+                assert UserPath.panvimdoc.exists(), f"Error: panvimdoc GitHub repo not found at {UserPath.panvimdoc}."
         except Exception as err:
             print(err)
             exit(1)
@@ -33,10 +33,6 @@ class GenerateVimdoc:
     def check_dependency() -> None:
         if which("pandoc") is None:
             print("Error: pandoc executable not found.")
-            exit(1)
-
-        if not UserPath.output_vimdoc.exists():
-            print("Error: panvimdoc GitHub repo not found.")
             exit(1)
 
     @classmethod
