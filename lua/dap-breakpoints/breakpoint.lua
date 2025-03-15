@@ -1,38 +1,39 @@
-local M = {}
-
 local nvim_dap = require("dap")
 local nvim_dap_breakpoints = require("dap.breakpoints")
 local persistent_breakpoints = require("persistent-breakpoints.api")
 
 local config = require("dap-breakpoints.config")
 
----@class Breakpoint
+---@class DapBpBreakpoint
+local M = {}
+
+---@class DapBp.Breakpoint
 ---@field line integer
----@field condition string|nil
----@field hitCondition string|nil
----@field logMessage string|nil
----@field state table|nil
+---@field condition string?
+---@field hitCondition string?
+---@field logMessage string?
+---@field state table?
 
----@class BreakpointProperty
----@field condition string|nil
----@field hit_condition string|nil
----@field log_message string|nil
+---@class DapBp.BreakpointProperty
+---@field condition string?
+---@field hit_condition string?
+---@field log_message string?
 
----@alias Bufnr integer
-
----@class BufAndLine
----@field bufnr Bufnr
+---@class DapBp.Location
+---@field bufnr integer
 ---@field line integer
 
----@return table<Bufnr, Breakpoint[]>
+---Get breakpoints in all buffers
+---@return table<integer, DapBp.Breakpoint[]>
 function M.get_all_breakpoints()
   return nvim_dap_breakpoints.get()
 end
 
----@param _bufnr Bufnr|nil
----@return Breakpoint[]
-function M.get_buffer_breakpoints(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+---Get breakpoints in buffer
+---@param bufnr integer?
+---@return DapBp.Breakpoint[]
+function M.get_buffer_breakpoints(bufnr)
+  bufnr = bufnr or vim.fn.bufnr()
 
   local buffer_breakpoints = M.get_all_breakpoints()[bufnr]
   if buffer_breakpoints == nil or #buffer_breakpoints == 0 then
@@ -42,8 +43,9 @@ function M.get_buffer_breakpoints(_bufnr)
   return buffer_breakpoints
 end
 
----@param opt BufAndLine|nil
----@return Breakpoint|nil
+---Get breakpoint at line
+---@param opt DapBp.Location?
+---@return DapBp.Breakpoint?
 function M.get_breakpoint(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
@@ -74,25 +76,25 @@ function M.get_total_breakpoints_count()
   return total
 end
 
----@param target Breakpoint
+---@param target DapBp.Breakpoint
 ---@return boolean
 function M.is_log_point(target)
   return target.logMessage ~= nil
 end
 
----@param target Breakpoint
+---@param target DapBp.Breakpoint
 ---@return boolean
 function M.is_conditional_breakpoint(target)
   return target.condition ~= nil
 end
 
----@param target Breakpoint
+---@param target DapBp.Breakpoint
 ---@return boolean
 function M.is_hit_condition_breakpoint(target)
   return target.hitCondition ~= nil
 end
 
----@param target Breakpoint
+---@param target DapBp.Breakpoint
 ---@return boolean
 function M.is_normal_breakpoint(target)
   return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
@@ -112,7 +114,7 @@ function M.auto_save()
   end
 end
 
----@param opt BreakpointProperty|nil
+---@param opt DapBp.BreakpointProperty?
 function M.set_breakpoint(opt)
   if opt then
     nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)

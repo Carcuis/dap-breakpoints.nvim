@@ -1,49 +1,55 @@
-local M = {}
-
 local api = require("dap-breakpoints.api")
 local config = require("dap-breakpoints.config")
 
-local function setup_commands()
+---@class DapBp
+local M = {}
+
+---@class DapBpCommand
+---@field [1] string command
+---@field [2] function api
+
+function M.setup_commands()
+  ---@type DapBpCommand[]
   local commands = {
-    { name = "DapBpNext", api = api.go_to_next },
-    { name = "DapBpPrev", api = api.go_to_previous },
-    { name = "DapBpReveal", api = api.popup_reveal },
-    { name = "DapBpLoad", api = function() api.load_breakpoints({ notify = true }) end },
-    { name = "DapBpSave", api = function() api.save_breakpoints({ notify = true }) end },
-    { name = "DapBpEdit", api = api.edit_property },
-    { name = "DapBpToggle", api = api.toggle_breakpoint },
-    { name = "DapBpSetConditionalPoint", api = api.set_conditional_breakpoint },
-    { name = "DapBpSetHitConditionPoint", api = api.set_hit_condition_breakpoint },
-    { name = "DapBpSetLogPoint", api = api.set_log_point },
-    { name = "DapBpClearAll", api = api.clear_all_breakpoints },
-    { name = "DapBpVirtEnable", api = api.enable_virtual_text },
-    { name = "DapBpVirtDisable", api = api.disable_virtual_text },
-    { name = "DapBpVirtToggle", api = api.toggle_virtual_text },
+    { "DapBpNext", api.go_to_next },
+    { "DapBpPrev", api.go_to_previous },
+    { "DapBpReveal", api.popup_reveal },
+    { "DapBpLoad", function() api.load_breakpoints({ notify = true }) end },
+    { "DapBpSave", function() api.save_breakpoints({ notify = true }) end },
+    { "DapBpEdit", api.edit_property },
+    { "DapBpToggle", api.toggle_breakpoint },
+    { "DapBpSetConditionalPoint", api.set_conditional_breakpoint },
+    { "DapBpSetHitConditionPoint", api.set_hit_condition_breakpoint },
+    { "DapBpSetLogPoint", api.set_log_point },
+    { "DapBpClearAll", api.clear_all_breakpoints },
+    { "DapBpVirtEnable", api.enable_virtual_text },
+    { "DapBpVirtDisable", api.disable_virtual_text },
+    { "DapBpVirtToggle", api.toggle_virtual_text },
   }
 
   for _, command in ipairs(commands) do
-    vim.api.nvim_create_user_command(command.name, command.api, {})
+    vim.api.nvim_create_user_command(command[1], command[2], {})
   end
 end
 
-local function setup_highlight_groups()
+function M.setup_highlight_groups()
   local highlights = {
-    { group = 'DapBreakpointVirt', default = 'NonText' },
-    { group = 'DapLogPointVirt', default = 'DapBreakpointVirt' },
-    { group = 'DapConditionalPointVirt', default = 'DapBreakpointVirt' },
-    { group = 'DapHitConditionPointVirt', default = 'DapBreakpointVirt' },
-    { group = 'DapBreakpointVirtPrefix', default = 'DapBreakpointVirt' },
-    { group = 'DapLogPointVirtPrefix', default = 'DapBreakpointVirtPrefix' },
-    { group = 'DapConditionalPointVirtPrefix', default = 'DapBreakpointVirtPrefix' },
-    { group = 'DapHitConditionPointVirtPrefix', default = 'DapBreakpointVirtPrefix' },
+    { 'DapBreakpointVirt', 'NonText' },
+    { 'DapLogPointVirt', 'DapBreakpointVirt' },
+    { 'DapConditionalPointVirt', 'DapBreakpointVirt' },
+    { 'DapHitConditionPointVirt', 'DapBreakpointVirt' },
+    { 'DapBreakpointVirtPrefix', 'DapBreakpointVirt' },
+    { 'DapLogPointVirtPrefix', 'DapBreakpointVirtPrefix' },
+    { 'DapConditionalPointVirtPrefix', 'DapBreakpointVirtPrefix' },
+    { 'DapHitConditionPointVirtPrefix', 'DapBreakpointVirtPrefix' },
   }
 
   for _, highlight in ipairs(highlights) do
-    vim.api.nvim_set_hl(0, highlight.group, { link = highlight.default, default = true })
+    vim.api.nvim_set_hl(0, highlight[1], { link = highlight[2], default = true })
   end
 end
 
-local function setup_autocmds()
+function M.setup_autocmds()
   local group = vim.api.nvim_create_augroup("dap-breakpoints", { clear = true })
 
   if config.breakpoint.auto_load then
@@ -55,21 +61,22 @@ local function setup_autocmds()
   end
 end
 
-local function setup_virtual_text()
+function M.setup_virtual_text()
   if config.virtual_text.enabled then
     api.enable_virtual_text()
   end
 end
 
+---@param opt DapBpConfig?
 function M.setup(opt)
   for key, val in pairs(vim.tbl_deep_extend("force", config, opt or {})) do
     config[key] = val
   end
 
-  setup_commands()
-  setup_highlight_groups()
-  setup_autocmds()
-  setup_virtual_text()
+  M.setup_commands()
+  M.setup_highlight_groups()
+  M.setup_autocmds()
+  M.setup_virtual_text()
 end
 
 return M

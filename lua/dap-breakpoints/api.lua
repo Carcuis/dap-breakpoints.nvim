@@ -1,15 +1,16 @@
-local M = {}
-
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
 local util = require("dap-breakpoints.util")
 local virtual_text = require("dap-breakpoints.virtual-text")
 
+---@class DapBpApi
+local M = {}
+
 function M.go_to_previous()
   M.go_to_next({ reverse = true })
 end
 
----@param opt { reverse: boolean }|nil
+---@param opt { reverse: boolean }?
 function M.go_to_next(opt)
   local buffer_breakpoints = breakpoint.get_buffer_breakpoints()
   if #buffer_breakpoints == 0 then
@@ -51,7 +52,7 @@ function M.go_to_next(opt)
     end
   end
 
-  util.echo_message("Breakpoint " .. num .." of " .. count, vim.log.levels.INFO)
+  util.echo_message("Breakpoint " .. num .. " of " .. count, vim.log.levels.INFO)
 
   if next.line == _line then
     return
@@ -137,7 +138,7 @@ function M.disable_virtual_text()
   if config.virtual_text.current_line_only then
     virtual_text.unset_current_line_only_autocmd()
   elseif virtual_text.get_user_layout().layout_type ~= "eol" then
-      virtual_text.unset_decoration_provider()
+    virtual_text.unset_decoration_provider()
   end
   virtual_text.enabled = false
 end
@@ -169,7 +170,7 @@ function M.toggle_virtual_text()
   end
 end
 
----@param opt { notify: boolean }|nil
+---@param opt { notify: boolean }?
 function M.load_breakpoints(opt)
   breakpoint.load()
 
@@ -184,24 +185,24 @@ function M.load_breakpoints(opt)
   if opt and opt.notify then
     local total_count = breakpoint.get_total_breakpoints_count()
     local loaded_buf_count = vim.tbl_count(breakpoint.get_all_breakpoints())
-    local message = "Loaded "..total_count.." breakpoints in "..loaded_buf_count.." buffers."
+    local message = "Loaded " .. total_count .. " breakpoints in " .. loaded_buf_count .. " buffers."
     util.notify(message)
   end
 end
 
----@param opt { notify: boolean }|nil
+---@param opt { notify: boolean }?
 function M.save_breakpoints(opt)
   breakpoint.save()
 
   if opt and opt.notify then
     local total_count = breakpoint.get_total_breakpoints_count()
     local saved_buf_count = vim.tbl_count(breakpoint.get_all_breakpoints())
-    local message = "Saved "..total_count.." breakpoints in "..saved_buf_count.." buffers."
+    local message = "Saved " .. total_count .. " breakpoints in " .. saved_buf_count .. " buffers."
     util.notify(message)
   end
 end
 
----@param opt BreakpointProperty|nil
+---@param opt DapBp.BreakpointProperty?
 function M.set_breakpoint(opt)
   if opt then
     for _, prop in ipairs({ "condition", "hit_condition", "log_message" }) do
@@ -261,7 +262,7 @@ function M.clear_all_breakpoints()
     return
   end
 
-  vim.ui.input({ prompt = "Clear all ("..total_count..") breakpoints"..and_save.."? [y/N] " }, function(input)
+  vim.ui.input({ prompt = "Clear all (" .. total_count .. ") breakpoints" .. and_save .. "? [y/N] " }, function(input)
     if input and string.match(string.lower(input), '^ye?s?$') then
       if virtual_text.enabled then
         virtual_text.clear_all_virtual_text()

@@ -1,41 +1,47 @@
+---@class DapBpUtil
 local M = {}
 
-local message_highlight_map = {
-  [vim.log.levels.INFO] = "MsgArea",
-  [vim.log.levels.WARN] = "WarningMsg",
-  [vim.log.levels.ERROR] = "ErrorMsg",
-}
+---@class DapBpUtil.PopupContent
+---@field message string
+---@field title string
+---@field syntax string
 
 ---@param message string
 ---@param level integer
 function M.echo_message(message, level)
-  vim.api.nvim_echo({{ message, message_highlight_map[level] or "MsgArea" }}, false, {})
+  local message_highlight_map = {
+    [vim.log.levels.INFO] = "MsgArea",
+    [vim.log.levels.WARN] = "WarningMsg",
+    [vim.log.levels.ERROR] = "ErrorMsg",
+  }
+  local highlight = message_highlight_map[level] or "MsgArea"
+  vim.api.nvim_echo({ { message, highlight } }, false, {})
 end
 
 ---@param message string
----@param level integer|nil
+---@param level integer?
 function M.notify(message, level)
   level = level or vim.log.levels.INFO
   vim.notify(message, level, { title = "dap-breakpoints" })
 end
 
----@param opts { message: string, title: string, syntax: string }
-function M.show_popup(opts)
+---@param content DapBpUtil.PopupContent
+function M.show_popup(content)
   local width = 9
-  if string.len(opts.message) > width then
-    width = string.len(opts.message)
+  if string.len(content.message) > width then
+    width = string.len(content.message)
   end
-  if string.len(opts.title) > width then
-    width = string.len(opts.title)
+  if string.len(content.title) > width then
+    width = string.len(content.title)
   end
-  local default_opts = {
+  local opts = {
     border = "single",
+    title = content.title,
     title_pos = "left",
     width = width + 1,
   }
-  local final_opts = vim.tbl_deep_extend("force", default_opts, opts)
-  local bufnr, _ = vim.lsp.util.open_floating_preview({ opts.message }, opts.syntax, final_opts)
-  vim.bo[bufnr].filetype = opts.syntax
+  local bufnr, _ = vim.lsp.util.open_floating_preview({ content.message }, content.syntax, opts)
+  vim.bo[bufnr].filetype = content.syntax
 end
 
 ---@param filetype string

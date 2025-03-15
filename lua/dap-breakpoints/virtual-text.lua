@@ -1,21 +1,25 @@
-local M = {
-  enabled = false
-}
-
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
 
-local namespace = "dap-breakpoints"
-local ns_id = vim.api.nvim_create_namespace(namespace)
+---@class DapBpVirtText
+local M = {
+  enabled = false,
+  ns_id = vim.api.nvim_create_namespace("dap-breakpoints"),
+}
 
----@alias LayoutType "eol"|"right_align"|"overlay"
+---@alias DapBpVirtText.LayoutType "eol"|"right_align"|"overlay"
+---@alias DapBpVirtText.HlGroup
+---| '"DapBreakpointVirt"'
+---| '"DapLogPointVirt"'
+---| '"DapConditionalPointVirt"'
+---| '"DapHitConditionPointVirt"'
 
-function M.get_ns_id()
-  return ns_id
-end
+---@class DapBp.VirtualText
+---@field [1] string text
+---@field [2] DapBpVirtText.HlGroup? highlight group
 
----@param target Breakpoint
----@return string
+---@param target DapBp.Breakpoint
+---@return DapBpVirtText.HlGroup
 function M.get_virtual_text_hl_group(target)
   if breakpoint.is_log_point(target) then
     return "DapLogPointVirt"
@@ -28,17 +32,18 @@ function M.get_virtual_text_hl_group(target)
   end
 end
 
----@param opt BufAndLine|nil
+---@param opt DapBp.Location?
 function M.clear_virtual_text_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
 
-  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, line - 1, line)
+  vim.api.nvim_buf_clear_namespace(bufnr, M.ns_id, line - 1, line)
 end
 
-function M.clear_virtual_text_in_buffer(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
-  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
+---@param bufnr integer?
+function M.clear_virtual_text_in_buffer(bufnr)
+  bufnr = bufnr or vim.fn.bufnr()
+  vim.api.nvim_buf_clear_namespace(bufnr, M.ns_id, 0, -1)
 end
 
 function M.clear_all_virtual_text()
@@ -47,7 +52,7 @@ function M.clear_all_virtual_text()
   end
 end
 
----@return { layout_type: LayoutType, layout_col: integer }
+---@return { layout_type: DapBpVirtText.LayoutType, layout_col: integer }
 function M.get_user_layout()
   local user_layout = config.virtual_text.layout.position
   local layout_type = "eol"
@@ -65,8 +70,8 @@ function M.get_user_layout()
 end
 
 ---Generate virtual text. A list of `[text, highlight]` tuples, each representing a text chunk
----@param target Breakpoint
----@return table<integer, [string, string]>
+---@param target DapBp.Breakpoint
+---@return DapBp.VirtualText[]
 function M.generate_virtual_text_by_breakpoint(target)
   local normal = breakpoint.is_normal_breakpoint(target)
   local log_point = breakpoint.is_log_point(target)
@@ -116,16 +121,17 @@ function M.generate_virtual_text_by_breakpoint(target)
 
   local hl_group = M.get_virtual_text_hl_group(target)
 
+  ---@type DapBp.VirtualText[]
   local virt_text = {
     { string.rep(" ", spaces) },
     { prefix, hl_group .. "Prefix" },
-    { string.format(message), hl_group }
+    { message, hl_group },
   }
 
   return virt_text
 end
 
----@param opt BufAndLine|nil
+---@param opt DapBp.Location?
 function M.enable_virtual_text_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
@@ -144,10 +150,8 @@ function M.enable_virtual_text_on_line(opt)
   local virt_text = M.generate_virtual_text_by_breakpoint(target)
 
   local user_layout = M.get_user_layout()
-  ---@type LayoutType
-  local virt_text_pos = user_layout.layout_type
-  ---@type integer|nil
-  local virt_text_win_col = nil
+  local virt_text_pos = user_layout.layout_type ---@type DapBpVirtText.LayoutType
+  local virt_text_win_col = nil ---@type integer?
 
   local line_len = vim.fn.virtcol({ line, '$' }) - 1
   local leftcol = vim.fn.winsaveview().leftcol
@@ -177,7 +181,7 @@ function M.enable_virtual_text_on_line(opt)
 
   vim.api.nvim_buf_set_extmark(
     bufnr,
-    ns_id,
+    M.ns_id,
     line - 1,
     0,
     {
@@ -193,11 +197,11 @@ function M.enable_virtual_text_on_line(opt)
   )
 end
 
----@param _bufnr Bufnr|nil
-function M.enable_virtual_text_in_buffer(_bufnr)
-  local bufnr = _bufnr or vim.fn.bufnr()
+---@param bufnr integer?
+function M.enable_virtual_text_in_buffer(bufnr)
+  bufnr = bufnr or vim.fn.bufnr()
 
-  for _, _breakpoint in ipairs( breakpoint.get_buffer_breakpoints(bufnr)) do
+  for _, _breakpoint in ipairs(breakpoint.get_buffer_breakpoints(bufnr)) do
     M.enable_virtual_text_on_line({
       bufnr = bufnr,
       line = _breakpoint.line
@@ -221,7 +225,7 @@ end
 --- This can fix the issue of virtual text covering code when the code length exceeds
 --- the user-defined column position, especially for inlay hints updates.
 function M.set_decoration_provider()
-  vim.api.nvim_set_decoration_provider(ns_id, {
+  vim.api.nvim_set_decoration_provider(M.ns_id, {
     on_start = function(_, tick)
       if tick % 10 ~= 0 then
         return
@@ -232,7 +236,7 @@ function M.set_decoration_provider()
 end
 
 function M.unset_decoration_provider()
-  vim.api.nvim_set_decoration_provider(ns_id, {})
+  vim.api.nvim_set_decoration_provider(M.ns_id, {})
 end
 
 function M.set_current_line_only_autocmd()

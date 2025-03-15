@@ -1,6 +1,5 @@
-local config = {}
-
-config = {
+---@class DapBpConfig
+local M = {
   breakpoint = {
     auto_load = true,         -- auto load breakpoints on 'BufReadPost'
     auto_save = true,         -- auto save breakpoints when make changes to breakpoints
@@ -22,8 +21,8 @@ config = {
       conditional = "󰯲 ",
       hit_condition = "󰰁 ",
     },
-    custom_text_handler = nil, ---@type nil | fun(target: Breakpoint): string
+    custom_text_handler = nil, ---@type nil | fun(target: DapBp.Breakpoint): string
   },
 }
 
-return config
+return M
