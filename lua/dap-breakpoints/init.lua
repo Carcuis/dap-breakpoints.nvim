@@ -17,7 +17,9 @@ function M.setup_commands()
     { "DapBpLoad", function() api.load_breakpoints({ notify = true }) end },
     { "DapBpSave", function() api.save_breakpoints({ notify = true }) end },
     { "DapBpEdit", api.edit_property },
+    { "DapBpEditAll", function() api.edit_property({ all = true }) end },
     { "DapBpToggle", api.toggle_breakpoint },
+    { "DapBpSet", api.set_breakpoint },
     { "DapBpSetConditionalPoint", api.set_conditional_breakpoint },
     { "DapBpSetHitConditionPoint", api.set_hit_condition_breakpoint },
     { "DapBpSetLogPoint", api.set_log_point },
@@ -52,11 +54,11 @@ end
 function M.setup_autocmds()
   local group = vim.api.nvim_create_augroup("dap-breakpoints", { clear = true })
 
-  if config.breakpoint.auto_load then
+  if config.auto_load then
     vim.api.nvim_create_autocmd({ "BufReadPost" }, { group = group, callback = api.load_breakpoints })
   end
 
-  if config.breakpoint.auto_save then
+  if config.auto_save then
     vim.api.nvim_create_autocmd({ "BufWritePost", "QuitPre" }, { group = group, callback = api.save_breakpoints })
   end
 end

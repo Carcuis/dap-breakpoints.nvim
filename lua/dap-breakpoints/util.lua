@@ -28,8 +28,10 @@ end
 ---@param content DapBpUtil.PopupContent
 function M.show_popup(content)
   local width = 9
-  if string.len(content.message) > width then
-    width = string.len(content.message)
+  for line in content.message:gmatch("([^\n]*)\n?") do
+    if #line > width then
+      width = #line
+    end
   end
   if string.len(content.title) > width then
     width = string.len(content.title)
@@ -53,6 +55,16 @@ function M.set_input_ui_filetype(filetype)
         vim.bo[bufnr].filetype = filetype
         break
       end
+    end
+  end)
+end
+
+---@param prompt string
+---@param cb function
+function M.confirm(prompt, cb)
+  vim.ui.input({ prompt = prompt }, function(input)
+    if input and input:lower():match("^ye?s?$") then
+      cb()
     end
   end)
 end

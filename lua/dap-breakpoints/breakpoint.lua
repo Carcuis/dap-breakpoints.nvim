@@ -7,36 +7,32 @@ local config = require("dap-breakpoints.config")
 ---@class DapBpBreakpoint
 local M = {}
 
----@class DapBp.Breakpoint
----@field line integer
+---@class DapBp.BreakpointProperty
 ---@field condition string?
 ---@field hitCondition string?
 ---@field logMessage string?
----@field state table?
 
----@class DapBp.BreakpointProperty
----@field condition string?
----@field hit_condition string?
----@field log_message string?
+---@class DapBp.Breakpoint: DapBp.BreakpointProperty
+---@field line integer
 
 ---@class DapBp.Location
----@field bufnr integer
+---@field bufnr integer?
 ---@field line integer
 
 ---Get breakpoints in all buffers
 ---@return table<integer, DapBp.Breakpoint[]>
-function M.get_all_breakpoints()
+function M.get_all()
   return nvim_dap_breakpoints.get()
 end
 
 ---Get breakpoints in buffer
 ---@param bufnr integer?
 ---@return DapBp.Breakpoint[]
-function M.get_buffer_breakpoints(bufnr)
+function M.get_in_buffer(bufnr)
   bufnr = bufnr or vim.fn.bufnr()
 
-  local buffer_breakpoints = M.get_all_breakpoints()[bufnr]
-  if buffer_breakpoints == nil or #buffer_breakpoints == 0 then
+  local buffer_breakpoints = M.get_all()[bufnr]
+  if not buffer_breakpoints or #buffer_breakpoints == 0 then
     return {}
   end
 
@@ -46,18 +42,18 @@ end
 ---Get breakpoint at line
 ---@param opt DapBp.Location?
 ---@return DapBp.Breakpoint?
-function M.get_breakpoint(opt)
+function M.get(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
 
-  local buffer_breakpoints = M.get_buffer_breakpoints(bufnr)
+  local buffer_breakpoints = M.get_in_buffer(bufnr)
   if #buffer_breakpoints == 0 then
     return nil
   end
 
-  for _, _breakpoint in ipairs(buffer_breakpoints) do
-    if _breakpoint.line == line then
-      return _breakpoint
+  for _, bp in ipairs(buffer_breakpoints) do
+    if bp.line == line then
+      return bp
     end
   end
 
@@ -65,8 +61,8 @@ function M.get_breakpoint(opt)
 end
 
 ---@return integer
-function M.get_total_breakpoints_count()
-  local breakpoints = M.get_all_breakpoints()
+function M.get_total_count()
+  local breakpoints = M.get_all()
   local total = 0
 
   for _, buffer_breakpoints in pairs(breakpoints) do
@@ -76,28 +72,28 @@ function M.get_total_breakpoints_count()
   return total
 end
 
----@param target DapBp.Breakpoint
+---@param bp DapBp.Breakpoint
 ---@return boolean
-function M.is_log_point(target)
-  return target.logMessage ~= nil
+function M.has_log_message(bp)
+  return bp.logMessage ~= nil
 end
 
----@param target DapBp.Breakpoint
+---@param bp DapBp.Breakpoint
 ---@return boolean
-function M.is_conditional_breakpoint(target)
-  return target.condition ~= nil
+function M.has_condition(bp)
+  return bp.condition ~= nil
 end
 
----@param target DapBp.Breakpoint
+---@param bp DapBp.Breakpoint
 ---@return boolean
-function M.is_hit_condition_breakpoint(target)
-  return target.hitCondition ~= nil
+function M.has_hit_condition(bp)
+  return bp.hitCondition ~= nil
 end
 
----@param target DapBp.Breakpoint
+---@param bp DapBp.Breakpoint
 ---@return boolean
-function M.is_normal_breakpoint(target)
-  return target.logMessage == nil and target.condition == nil and target.hitCondition == nil
+function M.is_normal(bp)
+  return bp.logMessage == nil and bp.condition == nil and bp.hitCondition == nil
 end
 
 function M.load()
@@ -109,27 +105,27 @@ function M.save()
 end
 
 function M.auto_save()
-  if config.breakpoint.auto_save then
+  if config.auto_save then
     M.save()
   end
 end
 
 ---@param opt DapBp.BreakpointProperty?
-function M.set_breakpoint(opt)
+function M.set(opt)
   if opt then
-    nvim_dap.set_breakpoint(opt.condition, opt.hit_condition, opt.log_message)
+    nvim_dap.set_breakpoint(opt.condition, opt.hitCondition, opt.logMessage)
   else
     nvim_dap.set_breakpoint()
   end
   M.auto_save()
 end
 
-function M.toggle_breakpoint()
+function M.toggle()
   nvim_dap.toggle_breakpoint()
   M.auto_save()
 end
 
-function M.clear_all_breakpoints()
+function M.clear_all()
   nvim_dap.clear_breakpoints()
   M.auto_save()
 end

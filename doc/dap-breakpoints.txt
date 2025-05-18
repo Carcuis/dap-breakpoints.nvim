@@ -1,4 +1,4 @@
-*dap-breakpoints.txt*         For NVIM 0.10         Last change: 2025 March 15
+*dap-breakpoints.txt*          For NVIM 0.10          Last change: 2025 May 18
 
 ==============================================================================
 CONTENTS                                                     *dap-breakpoints*
@@ -43,20 +43,18 @@ CONFIGUATION                                    *dap-breakpoints-configuation*
 >lua
     -- default config
     require('dap-breakpoints').setup{
-      breakpoint = {
-        auto_load = true,         -- auto load breakpoints on 'BufReadPost'
-        auto_save = true,         -- auto save breakpoints when make changes to breakpoints
-        auto_reveal_popup = true, -- auto show pop up property when navigate to next/prev breakpoint
-      },
+      auto_load = true,         -- auto load breakpoints on 'BufReadPost'
+      auto_save = true,         -- auto save breakpoints when make changes to breakpoints
+      auto_reveal_popup = true, -- auto show pop up property when navigate to next/prev breakpoint
       virtual_text = {
         enabled = true,
         priority = 10,
         current_line_only = false,
+        preset = "default", ---@type "default" | "separate" | "icons_only" | "messages_only"
+        order = "chl", ---@type string order of conditional, hit_condition, log_point, omit a char to hide that type
         layout = {
-          position = 121,         ---@type "eol" | "right_align" | integer
-                                  -- can be "eol", "right_align", or a fixed number (>= 1) for starting column
-          spaces = 4,             -- spaces between code and virtual text, only for position = "eol"
-                                  -- their is at least one space between code and virtual text in neovim
+          position = 121, ---@type "eol" | "right_align" | integer
+          spaces = 4, -- spaces between code and virtual text, only for position = "eol"
         },
         prefix = {
           normal = "",
@@ -64,7 +62,7 @@ CONFIGUATION                                    *dap-breakpoints-configuation*
           conditional = "󰯲 ",
           hit_condition = "󰰁 ",
         },
-        custom_text_handler = nil, ---@type nil | fun(target: Breakpoint): string
+        custom_text_handler = nil, ---@type nil | fun(bp: DapBp.Breakpoint): string
       },
     }
 <
@@ -91,17 +89,25 @@ Reveal popup info about current breakpoint’s properties.
 `:DapBpLoad`
 
 Load saved breakpoints in current opened buffers by using
-persistent-breakpoints.nvim. Set `breakpoint.auto_load` to `true` to load
-breakpoints automatically on `BufReadPost`.
+persistent-breakpoints.nvim. Set `auto_load` to `true` to load breakpoints
+automatically on `BufReadPost`.
 
 `:DapBpSave`
 
 Save all breakpoints in buffers using persistent-breakpoints.nvim. Set
-`breakpoint.auto_save` to `true` to save breakpoints automatically on changes.
+`auto_save` to `true` to save breakpoints automatically on changes.
 
 `:DapBpEdit`
 
 Edit log point message or breakpoint condition for current breakpoint.
+
+`:DapBpEditAll`
+
+Edit or add all available properties of the current breakpoint.
+
+`:DapBpSet`
+
+Set all kinds of breakpoint at current line using vim.ui.select.
 
 `:DapBpSetLogPoint`
 
@@ -139,12 +145,14 @@ KEYMAPS                                              *dap-breakpoints-keymaps*
     local dapbp_api = require("dap-breakpoints.api")
     local dapbp_keymaps = {
       { "<leader>b", dapbp_api.toggle_breakpoint, desc = "Toggle Breakpoint" },
+      { "<leader>dts", dapbp_api.set_breakpoint, desc = "Set Breakpoint" },
       { "<leader>dtc", dapbp_api.set_conditional_breakpoint, desc = "Set Conditional Breakpoint" },
       { "<leader>dth", dapbp_api.set_hit_condition_breakpoint, desc = "Set Hit Condition Breakpoint" },
       { "<leader>dtl", dapbp_api.set_log_point, desc = "Set Log Point" },
       { "<leader>dtL", function() dapbp_api.load_breakpoints({ notify = true }) end, desc = "Load Breakpoints" },
-      { "<leader>dts", function() dapbp_api.save_breakpoints({ notify = true }) end, desc = "Save Breakpoints" },
+      { "<leader>dtS", function() dapbp_api.save_breakpoints({ notify = true }) end, desc = "Save Breakpoints" },
       { "<leader>dte", dapbp_api.edit_property, desc = "Edit Breakpoint Property" },
+      { "<leader>dtE", function() dapbp_api.edit_property({ all = true }) end, desc = "Edit All Breakpoint Properties" },
       { "<leader>dtv", dapbp_api.toggle_virtual_text, desc = "Toggle Breakpoint Virtual Text" },
       { "<leader>dtC", dapbp_api.clear_all_breakpoints, desc = "Clear All Breakpoints" },
       { "[b", dapbp_api.go_to_previous, desc = "Go to Previous Breakpoint" },

@@ -18,22 +18,8 @@ local M = {
 ---@field [1] string text
 ---@field [2] DapBpVirtText.HlGroup? highlight group
 
----@param target DapBp.Breakpoint
----@return DapBpVirtText.HlGroup
-function M.get_virtual_text_hl_group(target)
-  if breakpoint.is_log_point(target) then
-    return "DapLogPointVirt"
-  elseif breakpoint.is_conditional_breakpoint(target) then
-    return "DapConditionalPointVirt"
-  elseif breakpoint.is_hit_condition_breakpoint(target) then
-    return "DapHitConditionPointVirt"
-  else
-    return "DapBreakpointVirt"
-  end
-end
-
 ---@param opt DapBp.Location?
-function M.clear_virtual_text_on_line(opt)
+function M.clear_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
 
@@ -41,14 +27,14 @@ function M.clear_virtual_text_on_line(opt)
 end
 
 ---@param bufnr integer?
-function M.clear_virtual_text_in_buffer(bufnr)
+function M.clear_in_buffer(bufnr)
   bufnr = bufnr or vim.fn.bufnr()
   vim.api.nvim_buf_clear_namespace(bufnr, M.ns_id, 0, -1)
 end
 
-function M.clear_all_virtual_text()
-  for bufnr, _ in pairs(breakpoint.get_all_breakpoints()) do
-    M.clear_virtual_text_in_buffer(bufnr)
+function M.clear_all()
+  for bufnr, _ in pairs(breakpoint.get_all()) do
+    M.clear_in_buffer(bufnr)
   end
 end
 
@@ -70,28 +56,9 @@ function M.get_user_layout()
 end
 
 ---Generate virtual text. A list of `[text, highlight]` tuples, each representing a text chunk
----@param target DapBp.Breakpoint
+---@param bp DapBp.Breakpoint
 ---@return DapBp.VirtualText[]
-function M.generate_virtual_text_by_breakpoint(target)
-  local normal = breakpoint.is_normal_breakpoint(target)
-  local log_point = breakpoint.is_log_point(target)
-  local conditional = breakpoint.is_conditional_breakpoint(target)
-  local hit_condition = breakpoint.is_hit_condition_breakpoint(target)
-
-  local prefix_map = {
-    [normal] = config.virtual_text.prefix.normal,
-    [log_point] = config.virtual_text.prefix.log_point,
-    [conditional] = config.virtual_text.prefix.conditional,
-    [hit_condition] = config.virtual_text.prefix.hit_condition
-  }
-
-  local message_map = {
-    [normal] = "",
-    [log_point] = target.logMessage,
-    [conditional] = target.condition,
-    [hit_condition] = target.hitCondition
-  }
-
+function M.generate_by_breakpoint(bp)
   local layout_type = M.get_user_layout().layout_type
   local spaces = 0
 
@@ -101,38 +68,106 @@ function M.generate_virtual_text_by_breakpoint(target)
     spaces = 0
   end
 
-  local prefix = ""
-  local message = ""
+  local virt_text_map = {}
 
-  if type(config.virtual_text.custom_text_handler) == "function" then
-    message = config.virtual_text.custom_text_handler(target) or message
-  else
-    prefix = prefix_map[true] or prefix
-    message = message_map[true] or message
+  if breakpoint.has_log_message(bp) then
+    virt_text_map.l = {
+      prefix = config.virtual_text.prefix.log_point,
+      text = bp.logMessage,
+      hl = "DapLogPointVirt",
+    }
   end
 
-  if prefix == "" and message == "" then
+  if breakpoint.has_condition(bp) then
+    virt_text_map.c = {
+      prefix = config.virtual_text.prefix.conditional,
+      text = bp.condition,
+      hl = "DapConditionalPointVirt",
+    }
+  end
+
+  if breakpoint.has_hit_condition(bp) then
+    virt_text_map.h = {
+      prefix = config.virtual_text.prefix.hit_condition,
+      text = bp.hitCondition,
+      hl = "DapHitConditionPointVirt",
+    }
+  end
+
+  local parts = {}
+  local order = config.virtual_text.order or "chl"
+
+  for i = 1, #order do
+    local part = virt_text_map[order:sub(i, i):lower()]
+    if part then
+      table.insert(parts, part)
+    end
+  end
+
+  if breakpoint.is_normal(bp) and config.virtual_text.prefix.normal ~= "" then
+    table.insert(parts, {
+      prefix = config.virtual_text.prefix.normal,
+      text = "",
+      hl = "DapBreakpointVirt",
+    })
+  end
+
+  if type(config.virtual_text.custom_text_handler) == "function" then
+    local custom_message = config.virtual_text.custom_text_handler(bp)
+    if custom_message then
+      parts = { {
+        prefix = "",
+        text = custom_message,
+        hl = "DapBreakpointVirt",
+      } }
+    end
+  end
+
+  if #parts == 0 then
     return {}
   end
 
-  if layout_type == "right_align" then
-    message = message .. " "
-  end
-
-  local hl_group = M.get_virtual_text_hl_group(target)
-
   ---@type DapBp.VirtualText[]
   local virt_text = {
-    { string.rep(" ", spaces) },
-    { prefix, hl_group .. "Prefix" },
-    { message, hl_group },
+    { string.rep(" ", spaces) }
   }
+
+  local preset = config.virtual_text.preset or "default"
+
+  if preset == "default" or preset == "messages_only" then
+    for i, part in ipairs(parts) do
+      if preset == "default" then
+        table.insert(virt_text, { part.prefix, part.hl .. "Prefix" })
+      end
+      table.insert(virt_text, { part.text, part.hl })
+
+      if i < #parts then
+        table.insert(virt_text, { " " })
+      end
+    end
+  elseif preset == "separate" or preset == "icons_only" then
+    for _, part in ipairs(parts) do
+      table.insert(virt_text, { part.prefix, part.hl .. "Prefix" })
+    end
+
+    if preset == "separate" then
+      for _, part in ipairs(parts) do
+        if part.text and part.text ~= "" then
+          table.insert(virt_text, { " " .. part.text, part.hl })
+        end
+      end
+    end
+  end
+
+  if layout_type == "right_align" and #virt_text > 0 then
+    virt_text[#virt_text][1] = virt_text[#virt_text][1] .. " "
+  end
 
   return virt_text
 end
 
 ---@param opt DapBp.Location?
-function M.enable_virtual_text_on_line(opt)
+function M.enable_on_line(opt)
   local bufnr = opt and opt.bufnr or vim.fn.bufnr()
   local line = opt and opt.line or vim.fn.line(".")
 
@@ -140,14 +175,14 @@ function M.enable_virtual_text_on_line(opt)
     return
   end
 
-  local target = breakpoint.get_breakpoint({ bufnr = bufnr, line = line })
-  if target == nil then
+  local bp = breakpoint.get({ bufnr = bufnr, line = line })
+  if not bp then
     return
   end
 
-  M.clear_virtual_text_on_line({ bufnr = bufnr, line = line })
+  M.clear_on_line({ bufnr = bufnr, line = line })
 
-  local virt_text = M.generate_virtual_text_by_breakpoint(target)
+  local virt_text = M.generate_by_breakpoint(bp)
 
   local user_layout = M.get_user_layout()
   local virt_text_pos = user_layout.layout_type ---@type DapBpVirtText.LayoutType
@@ -198,39 +233,38 @@ function M.enable_virtual_text_on_line(opt)
 end
 
 ---@param bufnr integer?
-function M.enable_virtual_text_in_buffer(bufnr)
+function M.enable_in_buffer(bufnr)
   bufnr = bufnr or vim.fn.bufnr()
 
-  for _, _breakpoint in ipairs(breakpoint.get_buffer_breakpoints(bufnr)) do
-    M.enable_virtual_text_on_line({
+  for _, bp in ipairs(breakpoint.get_in_buffer(bufnr)) do
+    M.enable_on_line({
       bufnr = bufnr,
-      line = _breakpoint.line
+      line = bp.line
     })
   end
 end
 
-function M.enable_virtual_text_in_all_buffers()
-  for bufnr, buffer_breakpoints in pairs(breakpoint.get_all_breakpoints()) do
-    for _, _breakpoint in ipairs(buffer_breakpoints) do
-      M.enable_virtual_text_on_line({
+function M.enable_in_all_buffers()
+  for bufnr, buffer_breakpoints in pairs(breakpoint.get_all()) do
+    for _, bp in ipairs(buffer_breakpoints) do
+      M.enable_on_line({
         bufnr = bufnr,
-        line = _breakpoint.line
+        line = bp.line
       })
     end
   end
 end
 
---- Set decoration provider for virtual text if user layout type is "overlay" or "right_align".
----
---- This can fix the issue of virtual text covering code when the code length exceeds
---- the user-defined column position, especially for inlay hints updates.
+---Set decoration provider for virtual text if user layout type is "overlay" or "right_align".
+---This can fix the issue of virtual text covering code when the code length
+---exceeds the user-defined column position, especially for inlay hints updates.
 function M.set_decoration_provider()
   vim.api.nvim_set_decoration_provider(M.ns_id, {
     on_start = function(_, tick)
       if tick % 10 ~= 0 then
         return
       end
-      M.enable_virtual_text_in_buffer()
+      M.enable_in_buffer()
     end
   })
 end
@@ -245,8 +279,8 @@ function M.set_current_line_only_autocmd()
   vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
     group = group,
     callback = function()
-      M.clear_all_virtual_text()
-      M.enable_virtual_text_on_line()
+      M.clear_all()
+      M.enable_on_line()
     end
   })
 end
