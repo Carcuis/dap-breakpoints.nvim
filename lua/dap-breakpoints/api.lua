@@ -187,7 +187,7 @@ function M.edit_property(opt)
   local bp = breakpoint.get()
 
   if not bp then
-    util.echo_message("No breakpoints on current line.", vim.log.levels.WARN)
+    M.set_breakpoint()
     return
   end
 
