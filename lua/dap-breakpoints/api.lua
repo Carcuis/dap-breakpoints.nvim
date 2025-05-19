@@ -232,7 +232,7 @@ function M.edit_property(opt)
   end
 
   vim.ui.select(items, {
-    prompt = "Select property to edit:",
+    prompt = "Select property to edit",
     format_item = function(item)
       return item[1]
     end,
@@ -376,7 +376,7 @@ function M.set_breakpoint()
   }
 
   vim.ui.select(items, {
-    prompt = "Select breakpoint type:",
+    prompt = "Select breakpoint type",
     format_item = function(item)
       return item[1]
     end,
