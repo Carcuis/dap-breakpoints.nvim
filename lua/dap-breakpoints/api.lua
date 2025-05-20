@@ -133,7 +133,7 @@ end
 ---@param bp DapBp.Breakpoint
 function M.edit_condition(bp)
   local filetype = vim.bo.filetype
-  vim.ui.input({ prompt = "Edit condition: ", default = bp.condition }, function(input)
+  vim.ui.input({ prompt = "Edit condition", default = bp.condition }, function(input)
     local opt = {
       condition = input or bp.condition,
       hitCondition = bp.hitCondition,
@@ -147,7 +147,7 @@ end
 ---@param bp DapBp.Breakpoint
 function M.edit_hit_condition(bp)
   local filetype = vim.bo.filetype
-  vim.ui.input({ prompt = "Edit hit condition: ", default = bp.hitCondition }, function(input)
+  vim.ui.input({ prompt = "Edit hit condition", default = bp.hitCondition }, function(input)
     local opt = {
       condition = bp.condition,
       hitCondition = input or bp.hitCondition,
@@ -160,7 +160,7 @@ end
 
 ---@param bp DapBp.Breakpoint
 function M.edit_log_message(bp)
-  vim.ui.input({ prompt = "Edit log message: ", default = bp.logMessage }, function(input)
+  vim.ui.input({ prompt = "Edit log message", default = bp.logMessage }, function(input)
     local opt = {
       condition = bp.condition,
       hitCondition = bp.hitCondition,
@@ -173,7 +173,7 @@ end
 ---@param bp DapBp.Breakpoint
 function M.edit_line_number(bp)
   local current_line = bp.line
-  vim.ui.input({ prompt = "Move breakpoint to line: ", default = tostring(current_line) }, function(input)
+  vim.ui.input({ prompt = "Move breakpoint to line", default = tostring(current_line) }, function(input)
     if not input or input == "" then
       return
     end
@@ -401,7 +401,7 @@ end
 
 function M.set_conditional_breakpoint()
   local filetype = vim.bo.filetype
-  vim.ui.input({ prompt = "Conditional point expression: " }, function(input)
+  vim.ui.input({ prompt = "Conditional point expression" }, function(input)
     M._set_breakpoint({ condition = input })
   end)
   util.set_input_ui_filetype(filetype)
@@ -409,14 +409,14 @@ end
 
 function M.set_hit_condition_breakpoint()
   local filetype = vim.bo.filetype
-  vim.ui.input({ prompt = "Hit condition count: " }, function(input)
+  vim.ui.input({ prompt = "Hit condition count" }, function(input)
     M._set_breakpoint({ hitCondition = input })
   end)
   util.set_input_ui_filetype(filetype)
 end
 
 function M.set_log_point()
-  vim.ui.input({ prompt = "Log point message: " }, function(input)
+  vim.ui.input({ prompt = "Log point message" }, function(input)
     M._set_breakpoint({ logMessage = input })
   end)
 end
