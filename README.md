@@ -93,12 +93,12 @@ Set `auto_save` to `true` to save breakpoints automatically on changes.
 `:DapBpEdit`
 
 Edit log point message or breakpoint condition for current breakpoint.
-If no breakpoint exists on the current line, a new one will be created.
+If no breakpoint exists on the current line, a new one will be created before editing.
 
 `:DapBpEditAll`
 
 Edit or add all available properties of the current breakpoint.
-If no breakpoint exists on the current line, a new one will be created.
+If no breakpoint exists on the current line, a new one will be created before editing.
 
 `:DapBpSet`
 

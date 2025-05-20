@@ -187,8 +187,9 @@ function M.edit_property(opt)
   local bp = breakpoint.get()
 
   if not bp then
-    M.set_breakpoint()
-    return
+    M._set_breakpoint()
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    bp = breakpoint.get() ---@type DapBp.Breakpoint
   end
 
   local has_condition = breakpoint.has_condition(bp)

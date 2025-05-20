@@ -1,4 +1,4 @@
-*dap-breakpoints.txt*          For NVIM 0.10          Last change: 2025 May 19
+*dap-breakpoints.txt*          For NVIM 0.10          Last change: 2025 May 20
 
 ==============================================================================
 CONTENTS                                                     *dap-breakpoints*
@@ -100,12 +100,14 @@ Save all breakpoints in buffers using persistent-breakpoints.nvim. Set
 `:DapBpEdit`
 
 Edit log point message or breakpoint condition for current breakpoint. If no
-breakpoint exists on the current line, a new one will be created.
+breakpoint exists on the current line, a new one will be created before
+editing.
 
 `:DapBpEditAll`
 
 Edit or add all available properties of the current breakpoint. If no
-breakpoint exists on the current line, a new one will be created.
+breakpoint exists on the current line, a new one will be created before
+editing.
 
 `:DapBpSet`
 
