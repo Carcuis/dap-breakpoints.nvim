@@ -1,4 +1,4 @@
-*dap-breakpoints.txt*          For NVIM 0.10          Last change: 2025 May 20
+*dap-breakpoints.txt*          For NVIM 0.10         Last change: 2025 July 19
 
 ==============================================================================
 CONTENTS                                                     *dap-breakpoints*
@@ -153,8 +153,24 @@ KEYMAPS                                              *dap-breakpoints-keymaps*
       { "<leader>dtc", dapbp_api.set_conditional_breakpoint, desc = "Set Conditional Breakpoint" },
       { "<leader>dth", dapbp_api.set_hit_condition_breakpoint, desc = "Set Hit Condition Breakpoint" },
       { "<leader>dtl", dapbp_api.set_log_point, desc = "Set Log Point" },
-      { "<leader>dtL", function() dapbp_api.load_breakpoints({ notify = true }) end, desc = "Load Breakpoints" },
-      { "<leader>dtS", function() dapbp_api.save_breakpoints({ notify = true }) end, desc = "Save Breakpoints" },
+      {
+        "<leader>dtL",
+        function()
+          M.load_breakpoints({
+            notify = "always"  ---@type "always" | "never" | "on_empty" | "on_some"
+          })
+        end,
+        desc = "Load Breakpoints"
+      },
+      {
+        "<leader>dtS",
+        function()
+          dapbp_api.save_breakpoints({
+            notify = "always"  ---@type "always" | "never" | "on_empty" | "on_some"
+          })
+        end,
+        desc = "Save Breakpoints"
+      },
       { "<leader>dte", dapbp_api.edit_property, desc = "Edit Breakpoint Property" },
       { "<leader>dtE", function() dapbp_api.edit_property({ all = true }) end, desc = "Edit All Breakpoint Properties" },
       { "<leader>dtv", dapbp_api.toggle_virtual_text, desc = "Toggle Breakpoint Virtual Text" },

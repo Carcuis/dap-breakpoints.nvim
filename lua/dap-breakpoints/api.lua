@@ -6,6 +6,12 @@ local virtual_text = require("dap-breakpoints.virtual-text")
 ---@class DapBpApi
 local M = {}
 
+---@alias DapBp.NotificationMode
+---| '"always"'
+---| '"never"'
+---| '"on_empty"'
+---| '"on_some"'
+
 function M.go_to_previous()
   M.go_to_next({ reverse = true })
 end
@@ -319,11 +325,13 @@ function M.toggle_virtual_text()
   end
 end
 
----@param opt { notify: boolean }?
+---@param opt { notify: DapBp.NotificationMode }?
 function M.load_breakpoints(opt)
+  virtual_text.clear_all()
   breakpoint.load()
 
-  if virtual_text.enabled then
+  local total_count = breakpoint.get_total_count()
+  if virtual_text.enabled and total_count > 0 then
     if config.virtual_text.current_line_only then
       virtual_text.enable_on_line()
     else
@@ -332,21 +340,40 @@ function M.load_breakpoints(opt)
   end
 
   if opt and opt.notify then
-    local total_count = breakpoint.get_total_count()
-    local loaded_buf_count = vim.tbl_count(breakpoint.get_all())
-    local message = "Loaded " .. total_count .. " breakpoints in " .. loaded_buf_count .. " buffers."
+    if opt.notify == "never" or
+        (opt.notify == "on_empty" and total_count > 0) or
+        (opt.notify == "on_some" and total_count == 0) then
+      return
+    end
+    local message
+    if total_count == 0 then
+      message = "No breakpoints loaded."
+    else
+      local loaded_buf_count = vim.tbl_count(breakpoint.get_all())
+      message = "Loaded " .. total_count .. " breakpoints in " .. loaded_buf_count .. " buffers."
+    end
     util.notify(message)
   end
 end
 
----@param opt { notify: boolean }?
+---@param opt { notify: DapBp.NotificationMode }?
 function M.save_breakpoints(opt)
   breakpoint.save()
 
   if opt and opt.notify then
     local total_count = breakpoint.get_total_count()
-    local saved_buf_count = vim.tbl_count(breakpoint.get_all())
-    local message = "Saved " .. total_count .. " breakpoints in " .. saved_buf_count .. " buffers."
+    if opt.notify == "never" or
+        (opt.notify == "on_empty" and total_count > 0) or
+        (opt.notify == "on_some" and total_count == 0) then
+      return
+    end
+    local message
+    if total_count == 0 then
+      message = "Saved: no breakpoints set."
+    else
+      local saved_buf_count = vim.tbl_count(breakpoint.get_all())
+      message = "Saved " .. total_count .. " breakpoints in " .. saved_buf_count .. " buffers."
+    end
     util.notify(message)
   end
 end
