@@ -146,7 +146,7 @@ local dapbp_keymaps = {
   {
     "<leader>dtL",
     function()
-      M.load_breakpoints({
+      dapbp_api.load_breakpoints({
         notify = "always"  ---@type "always" | "never" | "on_empty" | "on_some"
       })
     end,

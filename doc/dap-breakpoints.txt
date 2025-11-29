@@ -1,4 +1,4 @@
-*dap-breakpoints.txt*          For NVIM 0.10         Last change: 2025 July 19
+*dap-breakpoints.txt*        For NVIM 0.10       Last change: 2025 November 29
 
 ==============================================================================
 CONTENTS                                                     *dap-breakpoints*
@@ -156,7 +156,7 @@ KEYMAPS                                              *dap-breakpoints-keymaps*
       {
         "<leader>dtL",
         function()
-          M.load_breakpoints({
+          dapbp_api.load_breakpoints({
             notify = "always"  ---@type "always" | "never" | "on_empty" | "on_some"
           })
         end,
