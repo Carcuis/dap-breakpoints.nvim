@@ -1,5 +1,6 @@
 local breakpoint = require("dap-breakpoints.breakpoint")
 local config = require("dap-breakpoints.config")
+local session = require("dap-breakpoints.session")
 local util = require("dap-breakpoints.util")
 local virtual_text = require("dap-breakpoints.virtual-text")
 
@@ -463,6 +464,27 @@ function M.clear_all_breakpoints()
       virtual_text.clear_all()
     end
     breakpoint.clear_all()
+  end)
+end
+
+function M.edit_exception_filters()
+  if not session.has_exception_filters() then
+    util.notify("No debugging session active or exception filters not supported.", vim.log.levels.WARN)
+    return
+  end
+
+  util.show_exception_picker(session.exception_filters, function(selected_filters)
+    if not selected_filters then
+      return
+    end
+
+    session.set_exception_breakpoints(selected_filters)
+
+    if #selected_filters == 0 then
+      util.notify("Exception filters cleared.", vim.log.levels.INFO)
+    else
+      util.notify("Exception filters set: " .. table.concat(selected_filters, ", "), vim.log.levels.INFO)
+    end
   end)
 end
 

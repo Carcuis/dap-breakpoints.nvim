@@ -1,8 +1,8 @@
 # dap-breakpoints.nvim
 
-`dap-breakpoints.nvim` is a Lua plugin for Neovim that helps manage breakpoints,
-create advanced breakpoints using vim.ui.input, and display breakpoint
-properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-dap).
+`dap-breakpoints.nvim` is a Lua plugin for Neovim that helps manage breakpoints (including exception filters),
+create advanced breakpoints using vim.ui.input, and display breakpoint properties as virtual text with
+[nvim-dap](https://github.com/mfussenegger/nvim-dap).
 
 <!-- panvimdoc-ignore-start -->
 
@@ -14,7 +14,7 @@ properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-
 - [Commands](#commands)
 - [Keymaps](#keymaps)
 - [Highlight Groups](#highlight-groups)
-- [Reference](#reference)
+- [References](#references)
 
 <!-- panvimdoc-ignore-end -->
 
@@ -23,8 +23,11 @@ properties as virtual text with [nvim-dap](https://github.com/mfussenegger/nvim-
 - Neovim >= 0.10
 - [nvim-dap](https://github.com/mfussenegger/nvim-dap)
 - [persistent-breakpoints.nvim](https://github.com/Weissle/persistent-breakpoints.nvim)
-- [dressing.nvim](https://github.com/stevearc/dressing.nvim) (optional)
+- [dressing.nvim](https://github.com/stevearc/dressing.nvim) (optional, for syntax highlighting in vim.ui.input)
 - [nvim-notify](https://github.com/rcarriga/nvim-notify) (optional)
+- [snacks.nvim](https://github.com/folke/snacks.nvim) or
+[telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+(optional, for multi-selector UI in `:DapBpEditException`)
 
 ## Setup
 
@@ -37,7 +40,7 @@ require("dap-breakpoints").setup()
 
 ```lua
 -- default config
-require('dap-breakpoints').setup{
+require("dap-breakpoints").setup{
   auto_load = true,         -- auto load breakpoints on 'BufReadPost'
   auto_save = true,         -- auto save breakpoints when make changes to breakpoints
   auto_reveal_popup = true, -- auto show pop up property when navigate to next/prev breakpoint
@@ -132,6 +135,17 @@ Clear virtual text information about breakpoints.
 
 Toggle virtual text information about breakpoints.
 
+`:DapBpEditException`
+
+Edit exception breakpoint filters using multi-selector ([snacks.nvim](https://github.com/folke/snacks.nvim) /
+[telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)).
+
+> [!NOTE]
+>
+> By default, the enabled exception breakpoint filters follows
+> `require("dap").defaults.[config/adapter type].exception_breakpoints` or
+> `require("dap").defaults.fallback.exception_breakpoints` in your configuration.
+
 ## Keymaps
 
 ```lua
@@ -168,6 +182,7 @@ local dapbp_keymaps = {
   { "[b", dapbp_api.go_to_previous, desc = "Go to Previous Breakpoint" },
   { "]b", dapbp_api.go_to_next, desc = "Go to Next Breakpoint" },
   { "<M-b>", dapbp_api.popup_reveal, desc = "Reveal Breakpoint" },
+  { "<leader>def", dapbp_api.edit_exception_filters, desc = "Edit Exception Breakpoint Filters" },
 }
 for _, keymap in ipairs(dapbp_keymaps) do
   vim.keymap.set("n", keymap[1], keymap[2], { desc = keymap.desc })
@@ -185,6 +200,7 @@ end
 - `DapHitConditionPointVirt`
 - `DapHitConditionPointVirtPrefix`
 
-## Reference
+## References
 
 - [dap-info](https://github.com/jonathan-elize/dap-info.nvim)
+- [nvim-dap-exception-breakpoints](https://github.com/lucaSartore/nvim-dap-exception-breakpoints)

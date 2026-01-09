@@ -1,5 +1,8 @@
 local api = require("dap-breakpoints.api")
 local config = require("dap-breakpoints.config")
+local session = require("dap-breakpoints.session")
+
+local nvim_dap = require("dap")
 
 ---@class DapBp
 local M = {}
@@ -27,6 +30,7 @@ function M.setup_commands()
     { "DapBpVirtEnable", api.enable_virtual_text },
     { "DapBpVirtDisable", api.disable_virtual_text },
     { "DapBpVirtToggle", api.toggle_virtual_text },
+    { "DapBpEditException", api.edit_exception_filters },
   }
 
   for _, command in ipairs(commands) do
@@ -69,6 +73,19 @@ function M.setup_virtual_text()
   end
 end
 
+function M.setup_dap_listeners()
+  nvim_dap.listeners.after.configurationDone.dapbp_exception = function(dap_session, _)
+    session.init_exception_filters(dap_session)
+  end
+
+  nvim_dap.listeners.after.launch.dapbp_exception = function(_, _)
+    local filters = session.get_activated_filters()
+    if #filters > 0 then
+      nvim_dap.set_exception_breakpoints(filters)
+    end
+  end
+end
+
 ---@param opt DapBpConfig?
 function M.setup(opt)
   for key, val in pairs(vim.tbl_deep_extend("force", config, opt or {})) do
@@ -79,6 +96,7 @@ function M.setup(opt)
   M.setup_highlight_groups()
   M.setup_autocmds()
   M.setup_virtual_text()
+  M.setup_dap_listeners()
 end
 
 return M
